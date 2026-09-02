@@ -3,55 +3,82 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Protótipo acessível do sistema Rework para gestão e priorização de retrabalhos." />
   <title>Rework | Gestão de Retrabalhos</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <aside class="sidebar">
-    <div class="brand"><span>R</span><div><strong>REWORK</strong><small>Gestão de Retrabalhos</small></div></div>
+  <a class="skip-link" href="#conteudo-principal">Ir para o conteúdo principal</a>
+
+  <aside class="sidebar" aria-label="Navegação principal">
+    <div class="brand" aria-label="Rework - Gestão de Retrabalhos"><span aria-hidden="true">R</span><div><strong>REWORK</strong><small>Gestão de Retrabalhos</small></div></div>
     <nav>
-      <a class="active" href="#dashboard">▦ Dashboard</a>
-      <a href="#ocorrencias">▤ Ocorrências</a>
-      <a href="#nova">＋ Nova ocorrência</a>
-      <a href="#seriais">▥ Seriais & Containers</a>
-      <a href="#prioridades">◆ Prioridades</a>
-      <a href="#historico">◷ Histórico</a>
-      <a href="#cadastros">⚙ Cadastros</a>
+      <a class="active" href="#dashboard" aria-current="page">▦ <span>Dashboard</span></a>
+      <a href="#ocorrencias">▤ <span>Ocorrências</span></a>
+      <button class="nav-button" type="button" data-open-modal>＋ <span>Nova ocorrência</span></button>
+      <a href="#seriais">▥ <span>Seriais & Containers</span></a>
+      <a href="#prioridades">◆ <span>Prioridades</span></a>
+      <a href="#historico">◷ <span>Histórico</span></a>
+      <a href="#cadastros">⚙ <span>Cadastros</span></a>
     </nav>
-    <div class="profile"><div class="avatar">QA</div><div><strong>Usuário Qualidade</strong><small>Perfil: Qualidade</small></div></div>
+    <div class="profile"><div class="avatar" aria-hidden="true">QA</div><div><strong>Usuário Qualidade</strong><small>Perfil: Qualidade</small></div></div>
   </aside>
 
-  <main>
-    <header><div><h1>Dashboard</h1><p>Visão geral das ocorrências de retrabalho</p></div><button class="primary" data-open-modal>＋ Nova ocorrência</button></header>
+  <main id="conteudo-principal" tabindex="-1">
+    <header class="page-header"><div><span class="eyebrow">Visão operacional</span><h1>Dashboard</h1><p>Visão geral das ocorrências de retrabalho</p></div><button class="primary" type="button" data-open-modal>＋ Nova ocorrência</button></header>
 
-    <section id="dashboard" class="cards">
-      <article><span>Ocorrências abertas</span><strong>18</strong><small>5 em alta prioridade</small></article>
-      <article><span>Unidades bloqueadas</span><strong>14.383</strong><small>11,2% em retrabalho</small></article>
-      <article><span>Em retrabalho</span><strong>1.618</strong><small>Atualização operacional</small></article>
-      <article><span>Pendentes</span><strong>12.765</strong><small>89% do volume bloqueado</small></article>
-      <article><span>NG</span><strong>435</strong><small>Unidades não conformes</small></article>
-      <article><span>Custo acumulado</span><strong>R$ 28,4 mil</strong><small>Estimativa das ocorrências</small></article>
+    <div id="statusMessage" class="status-message" role="status" aria-live="polite"></div>
+
+    <section id="dashboard" aria-labelledby="titulo-resumo">
+      <div class="section-heading"><div><h2 id="titulo-resumo">Resumo do processo</h2><p>Indicadores principais para tomada de decisão.</p></div><span class="updated">Atualização do protótipo: dados demonstrativos</span></div>
+      <div class="cards">
+        <article><span>Ocorrências abertas</span><strong>18</strong><small><span class="dot danger" aria-hidden="true"></span>5 em alta prioridade</small></article>
+        <article><span>Unidades bloqueadas</span><strong>14.383</strong><small>11,2% em retrabalho</small></article>
+        <article><span>Em retrabalho</span><strong>1.618</strong><small><span class="dot info" aria-hidden="true"></span>Status: em processamento</small></article>
+        <article><span>Pendentes</span><strong>12.765</strong><small><span class="dot warning" aria-hidden="true"></span>89% do volume bloqueado</small></article>
+        <article><span>Não conformes (NG)</span><strong>435</strong><small><span class="dot danger" aria-hidden="true"></span>Resultado NG</small></article>
+        <article><span>Custo acumulado</span><strong>R$ 28,4 mil</strong><small>Estimativa das ocorrências</small></article>
+      </div>
     </section>
 
-    <section class="grid-2">
-      <article class="panel"><div class="panel-title"><div><h2>Prioridades de retrabalho</h2><p>Ranking por impacto, volume e tempo parado</p></div><a href="#prioridades">Ver ranking</a></div><div id="priorityList"></div></article>
-      <article class="panel"><div class="panel-title"><div><h2>Indicadores</h2><p>Resumo operacional</p></div></div><div class="metric"><span>Tempo médio parado</span><strong>18h 42min</strong></div><div class="metric"><span>Ocorrências com SLA vencido</span><strong>4</strong></div><div class="metric"><span>Taxa de conclusão</span><strong>72%</strong></div><div class="progress"><i style="width:72%"></i></div></article>
+    <section class="grid-2" aria-label="Priorização e indicadores">
+      <article id="prioridades" class="panel"><div class="panel-title"><div><h2>Prioridades de retrabalho</h2><p>Ranking por volume, tempo, recorrência e impacto estimado.</p></div><a href="#ocorrencias">Ver ocorrências</a></div><div id="priorityList"></div></article>
+      <article class="panel"><div class="panel-title"><div><h2>Indicadores</h2><p>Resumo operacional</p></div></div><div class="metric"><span>Tempo médio parado</span><strong>18h 42min</strong></div><div class="metric"><span>Ocorrências com SLA vencido</span><strong>4</strong></div><div class="metric"><span>Taxa de conclusão</span><strong>72%</strong></div><div class="progress" role="progressbar" aria-label="Taxa de conclusão" aria-valuemin="0" aria-valuemax="100" aria-valuenow="72"><i style="width:72%"></i></div></article>
     </section>
 
-    <section id="ocorrencias" class="panel table-panel">
-      <div class="panel-title"><div><h2>Ocorrências recentes</h2><p>Acompanhamento e rastreabilidade do processo</p></div><input id="search" placeholder="Buscar ID, linha, modelo ou problema..." /></div>
-      <div class="table-wrap"><table><thead><tr><th>ID</th><th>Linha / Modelo</th><th>Problema</th><th>Bloqueado</th><th>Retrabalhado</th><th>Tempo</th><th>Custo</th><th>Prioridade</th><th>Status</th></tr></thead><tbody id="occurrenceRows"></tbody></table></div>
+    <section id="ocorrencias" class="panel table-panel" aria-labelledby="titulo-ocorrencias">
+      <div class="panel-title"><div><h2 id="titulo-ocorrencias">Ocorrências recentes</h2><p>Acompanhamento e rastreabilidade do processo.</p></div><div class="search-group"><label for="search">Buscar ocorrências</label><input id="search" type="search" autocomplete="off" placeholder="ID, linha, modelo ou problema" /></div></div>
+      <div class="table-wrap" tabindex="0" aria-label="Tabela de ocorrências recentes"><table><caption class="sr-only">Ocorrências de retrabalho cadastradas no protótipo</caption><thead><tr><th scope="col">ID</th><th scope="col">Linha / Modelo</th><th scope="col">Problema</th><th scope="col">Bloqueado</th><th scope="col">Retrabalhado</th><th scope="col">Tempo</th><th scope="col">Custo</th><th scope="col">Prioridade</th><th scope="col">Status</th></tr></thead><tbody id="occurrenceRows"></tbody></table></div>
+      <p id="emptyState" class="empty-state" hidden>Nenhuma ocorrência corresponde à busca informada.</p>
     </section>
+
+    <section id="seriais" class="panel info-panel"><div><span class="eyebrow">Rastreabilidade</span><h2>Seriais & Containers</h2><p>Cada ocorrência poderá armazenar containers e números de série individualmente, permitindo acompanhar unidades bloqueadas, retrabalhadas, OK, NG e pendentes.</p></div><button class="secondary" type="button" data-open-modal>Registrar pela ocorrência</button></section>
+
+    <section id="historico" class="panel info-panel"><div><span class="eyebrow">Histórico imutável</span><h2>Rastreabilidade das alterações</h2><p>Atualizações de status, responsáveis, métodos e resultados deverão permanecer registradas para consulta posterior.</p></div></section>
   </main>
 
   <div class="modal" id="occurrenceModal" aria-hidden="true">
-    <div class="modal-card"><div class="modal-head"><div><h2>Nova ocorrência</h2><p>Registro inicial do problema de retrabalho</p></div><button class="close" data-close-modal>×</button></div>
-      <form id="occurrenceForm">
-        <div class="form-grid"><label>Linha<select required><option value="">Selecione</option><option>VM01</option><option>VM02</option><option>VM03</option><option>VM04</option></select></label><label>Modelo<input required placeholder="Ex.: UN50..." /></label><label>Tipo de problema<select required><option value="">Selecione</option><option>Qualidade</option><option>Processo</option><option>Material</option></select></label><label>Quantidade bloqueada<input required type="number" min="1" /></label></div>
-        <label>Descrição do problema<textarea required placeholder="Descreva a ocorrência, defeito e observações iniciais"></textarea></label>
-        <div class="form-grid"><label>Container<input placeholder="Identificação do container" /></label><label>Serial inicial<input placeholder="Bipe ou informe o serial" /></label><label>Serial final<input placeholder="Bipe ou informe o serial" /></label><label>Foto / evidência<input type="file" /></label></div>
-        <div class="hint">O método de retrabalho poderá ser preenchido pela Engenharia. Seriais e containers serão vinculados à ocorrência para rastreabilidade.</div>
-        <div class="actions"><button type="button" class="secondary" data-close-modal>Cancelar</button><button class="primary">Registrar ocorrência</button></div>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-describedby="modalDescription">
+      <div class="modal-head"><div><span class="eyebrow">Qualidade</span><h2 id="modalTitle">Nova ocorrência</h2><p id="modalDescription">Preencha os dados necessários para registrar o problema. Campos com * são obrigatórios.</p></div><button class="close" type="button" data-close-modal aria-label="Fechar janela">×</button></div>
+      <form id="occurrenceForm" novalidate>
+        <fieldset><legend>Identificação da ocorrência</legend><div class="form-grid">
+          <div class="field"><label for="line">Linha *</label><select id="line" required><option value="">Selecione</option><option>VM01</option><option>VM02</option><option>VM03</option><option>VM04</option></select><small class="field-error" id="lineError"></small></div>
+          <div class="field"><label for="model">Modelo *</label><input id="model" required placeholder="Ex.: UN50..." /><small class="field-error" id="modelError"></small></div>
+          <div class="field"><label for="problemType">Tipo de problema *</label><select id="problemType" required><option value="">Selecione</option><option>Qualidade</option><option>Processo</option><option>Material</option></select><small class="field-error" id="problemTypeError"></small></div>
+          <div class="field"><label for="blockedQty">Quantidade bloqueada *</label><input id="blockedQty" required type="number" min="1" inputmode="numeric" /><small class="field-error" id="blockedQtyError"></small></div>
+        </div></fieldset>
+
+        <fieldset><legend>Descrição do problema</legend><div class="field"><label for="problemDescription">Descrição *</label><textarea id="problemDescription" required maxlength="500" aria-describedby="descriptionHelp" placeholder="Descreva a ocorrência, defeito e observações iniciais"></textarea><div class="field-meta"><small id="descriptionHelp">Máximo de 500 caracteres.</small><small id="charCount">0/500</small></div><small class="field-error" id="problemDescriptionError"></small></div></fieldset>
+
+        <fieldset><legend>Lote, container e rastreabilidade</legend><div class="form-grid">
+          <div class="field"><label for="container">Container</label><input id="container" placeholder="Ex.: CT-001" /></div>
+          <div class="field"><label for="serialStart">Serial inicial</label><input id="serialStart" placeholder="Bipe ou informe o serial" /></div>
+          <div class="field"><label for="serialEnd">Serial final</label><input id="serialEnd" placeholder="Bipe ou informe o serial" /></div>
+          <div class="field"><label for="evidence">Foto / evidência</label><input id="evidence" type="file" accept="image/*" /><small>Formato de imagem para evidência visual.</small></div>
+        </div></fieldset>
+
+        <div class="hint" role="note"><strong>Regra de negócio:</strong> o método de retrabalho será informado pela Engenharia. Seriais e containers ficarão vinculados à ocorrência para rastreabilidade.</div>
+        <div class="actions"><button type="button" class="secondary" data-close-modal>Cancelar</button><button class="primary" type="submit">Registrar ocorrência</button></div>
       </form>
     </div>
   </div>
