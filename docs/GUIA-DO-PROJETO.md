@@ -51,11 +51,3 @@ O custo acumulado é a soma do aluguel de containers por hora e do atraso de ven
 | Expedição  | Dashboard, ocorrências e edição de custos.     |
 
 Essas permissões são aplicadas no navegador e servem apenas para demonstração. Segurança real exige autenticação e autorização validadas no servidor.
-
-## Próximos passos recomendados
-
-1. Criar banco de dados e API para ocorrências, usuários, seriais e anexos.
-2. Implementar autenticação com senhas protegidas e sessões de servidor.
-3. Mover as regras de autorização e cálculo financeiro para o backend.
-4. Adicionar testes automatizados e histórico de auditoria.
-5. Configurar ambiente, publicação e política de backup.
