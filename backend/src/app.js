@@ -1,10 +1,13 @@
 const express = require("express");
+const path = require("path");
 const routes = require("./routes");
 
-// Configura os recursos comuns e conecta as rotas da API.
+// Configura a API e publica os arquivos estáticos do protótipo.
 const app = express();
+const frontendPath = path.resolve(__dirname, "../../frontend");
 
 app.use(express.json());
-app.use("/", routes);
+app.use("/api", routes);
+app.use(express.static(frontendPath));
 
 module.exports = app;

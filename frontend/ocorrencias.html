@@ -16,7 +16,9 @@
           <h1>Ocorrências</h1>
           <p>Consulte, edite e acesse a bipagem de cada bloqueio.</p>
         </div>
-        <a class="primary quality-only" href="nova-ocorrencia.html">Criar ocorrência</a>
+        <a class="primary quality-only" href="nova-ocorrencia.html"
+          >Criar ocorrência</a
+        >
       </header>
       <!-- Filtros e listagem compacta das ocorrências. -->
       <section class="panel">
@@ -145,16 +147,34 @@
             </select>
           </div>
           <div class="field cost-field">
-            <label for="editContainerCost">Aluguel dos containers por hora (R$)</label>
-            <input id="editContainerCost" name="containerHourlyCost" type="number" min="0" step="0.01" />
+            <label for="editContainerCost"
+              >Aluguel dos containers por hora (R$)</label
+            >
+            <input
+              id="editContainerCost"
+              name="containerHourlyCost"
+              type="number"
+              min="0"
+              step="0.01"
+            />
           </div>
           <div class="field cost-field">
             <label for="editSalesCost">Atraso da venda por hora (R$)</label>
-            <input id="editSalesCost" name="salesDelayHourlyCost" type="number" min="0" step="0.01" />
+            <input
+              id="editSalesCost"
+              name="salesDelayHourlyCost"
+              type="number"
+              min="0"
+              step="0.01"
+            />
           </div>
         </div>
         <div class="actions">
-          <span id="editFormStatus" class="status-message error" role="alert"></span>
+          <span
+            id="editFormStatus"
+            class="status-message error"
+            role="alert"
+          ></span>
           <button class="secondary" type="button" data-close-dialog>
             Cancelar
           </button>

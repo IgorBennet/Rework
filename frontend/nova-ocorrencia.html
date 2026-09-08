@@ -130,33 +130,52 @@
             </div>
             <div class="cost-fields">
               <div class="field">
-                <label for="containerHourlyCost">Aluguel dos containers por hora (R$)</label>
-                <input id="containerHourlyCost" name="containerHourlyCost" type="number" min="0" step="0.01" value="0" />
+                <label for="containerHourlyCost"
+                  >Aluguel dos containers por hora (R$)</label
+                >
+                <input
+                  id="containerHourlyCost"
+                  name="containerHourlyCost"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value="0"
+                />
               </div>
               <div class="field">
-                <label for="salesDelayHourlyCost">Atraso da venda por hora (R$)</label>
-                <input id="salesDelayHourlyCost" name="salesDelayHourlyCost" type="number" min="0" step="0.01" value="0" />
+                <label for="salesDelayHourlyCost"
+                  >Atraso da venda por hora (R$)</label
+                >
+                <input
+                  id="salesDelayHourlyCost"
+                  name="salesDelayHourlyCost"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value="0"
+                />
               </div>
-              <small class="muted">Campos opcionais. A Expedição também pode preenchê-los depois.</small>
+              <small class="muted"
+                >Campos opcionais. A Expedição também pode preenchê-los
+                depois.</small
+              >
             </div>
           </div>
-          <h3 style="margin-top: 22px">Containers e quantidades</h3>
+          <h3 class="section-spacing">Containers e quantidades</h3>
           <p class="muted">A soma deve ser igual à quantidade bloqueada.</p>
           <div id="containerRows"></div>
           <button
             id="addContainer"
-            class="secondary"
+            class="secondary compact-spacing"
             type="button"
-            style="margin-top: 12px"
           >
             Adicionar container
           </button>
           <div
             id="newStatus"
-            class="status-message error"
+            class="status-message error status-spacing"
             role="alert"
             aria-live="assertive"
-            style="margin-top: 15px"
           ></div>
           <div class="actions">
             <button id="backStep" class="secondary" type="button">Voltar</button

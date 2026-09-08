@@ -93,7 +93,9 @@ const normalize = (data) =>
     createdAt: occurrence.createdAt || `${toIsoDate(occurrence.date)}T00:00:00`,
     resolvedAt:
       occurrence.resolvedAt ||
-      (occurrence.status === "Finalizado" ? `${toIsoDate(occurrence.date)}T23:59:59` : null),
+      (occurrence.status === "Finalizado"
+        ? `${toIsoDate(occurrence.date)}T23:59:59`
+        : null),
     containerHourlyCost: Number(occurrence.containerHourlyCost || 0),
     salesDelayHourlyCost: Number(occurrence.salesDelayHourlyCost || 0),
   }));
@@ -106,11 +108,14 @@ const read = () => {
       if (legacy && !localStorage.getItem("rework-v2-migrated")) {
         const previous = JSON.parse(legacy);
         data.forEach((occurrence) => {
-          const oldOccurrence = previous.find((item) => item.id === occurrence.id);
+          const oldOccurrence = previous.find(
+            (item) => item.id === occurrence.id,
+          );
           if (!oldOccurrence) return;
           ["method", "cause", "classification", "department", "person"].forEach(
             (key) => {
-              if (!occurrence[key] && oldOccurrence[key]) occurrence[key] = oldOccurrence[key];
+              if (!occurrence[key] && oldOccurrence[key])
+                occurrence[key] = oldOccurrence[key];
             },
           );
         });
@@ -160,12 +165,19 @@ const money = (value) =>
     currency: "BRL",
   });
 const blockedHours = (occurrence) => {
-  const end = occurrence.resolvedAt ? new Date(occurrence.resolvedAt).getTime() : Date.now();
-  return Math.max((end - new Date(occurrence.createdAt).getTime()) / 3600000, 0);
+  const end = occurrence.resolvedAt
+    ? new Date(occurrence.resolvedAt).getTime()
+    : Date.now();
+  return Math.max(
+    (end - new Date(occurrence.createdAt).getTime()) / 3600000,
+    0,
+  );
 };
 const hourlyCost = (occurrence) =>
-  Number(occurrence.containerHourlyCost || 0) + Number(occurrence.salesDelayHourlyCost || 0);
-const accumulatedCost = (occurrence) => hourlyCost(occurrence) * blockedHours(occurrence);
+  Number(occurrence.containerHourlyCost || 0) +
+  Number(occurrence.salesDelayHourlyCost || 0);
+const accumulatedCost = (occurrence) =>
+  hourlyCost(occurrence) * blockedHours(occurrence);
 const priority = (occurrence) => {
   const cost = accumulatedCost(occurrence);
   const hours = blockedHours(occurrence);
@@ -184,61 +196,134 @@ const costPriorityCell = (occurrence) => {
   const itemPriority = priority(occurrence);
   const en = preferenceLanguage() === "en";
   const priorityLabels = { low: "Low", medium: "Medium", high: "High" };
-  const value = hourlyCost(occurrence) > 0
-    ? money(accumulatedCost(occurrence))
-    : en ? "Cost not provided" : "Custo não informado";
+  const value =
+    hourlyCost(occurrence) > 0
+      ? money(accumulatedCost(occurrence))
+      : en
+        ? "Cost not provided"
+        : "Custo não informado";
   const hoursLabel = en ? "stopped" : "parado";
-  const priorityLabel = en ? priorityLabels[itemPriority.level] : itemPriority.label;
+  const priorityLabel = en
+    ? priorityLabels[itemPriority.level]
+    : itemPriority.label;
   return `<div class="cost-priority"><strong>${value}</strong><small>${money(hourlyCost(occurrence))}/h · ${Math.floor(blockedHours(occurrence))}h ${hoursLabel}</small><span class="priority ${itemPriority.level}">${itemPriority.icon} ${priorityLabel}</span></div>`;
 };
 
 // Textos principais usados pela opção de idioma inglês.
 const ENGLISH = {
-  "Visão geral": "Overview", "Painel da qualidade": "Quality dashboard",
-  "Visão consolidada dos bloqueios e do avanço de cada linha.": "Consolidated view of blocks and progress by line.",
-  "Criar ocorrência": "Create occurrence", "Bloqueios por linha": "Blocks by line",
-  "Acompanhamento operacional": "Operational tracking", "Linha": "Line", "Modelo": "Model",
-  "Data": "Date", "Problema": "Problem", "Qtd. bloqueada": "Blocked qty.",
-  "Qtd. pendente": "Pending qty.", "Qtd. defeito": "Defect qty.", "Status": "Status",
-  "Custo / prioridade": "Cost / priority", "Progresso geral": "Overall progress",
-  "Ver todas as ocorrências": "View all occurrences", "Ocorrências": "Occurrences",
-  "Histórico de bloqueios": "Block history", "Buscar ocorrência ou defeito": "Search occurrence or defect",
-  "Limpar filtros": "Clear filters", "Produto / linha": "Product / line", "Responsável": "Owner",
-  "Quantidades": "Quantities", "Ação": "Action", "Todos": "All", "Iniciado": "Started",
-  "Pendente": "Pending", "Finalizado": "Finished", "Editar bloqueio": "Edit block",
-  "Quantidade bloqueada": "Blocked quantity", "Problema / defeito": "Problem / defect",
-  "Descrição": "Description", "Pessoa responsável": "Owner",
+  "Visão geral": "Overview",
+  "Painel da qualidade": "Quality dashboard",
+  "Visão consolidada dos bloqueios e do avanço de cada linha.":
+    "Consolidated view of blocks and progress by line.",
+  "Criar ocorrência": "Create occurrence",
+  "Bloqueios por linha": "Blocks by line",
+  "Acompanhamento operacional": "Operational tracking",
+  Linha: "Line",
+  Modelo: "Model",
+  Data: "Date",
+  Problema: "Problem",
+  "Qtd. bloqueada": "Blocked qty.",
+  "Qtd. pendente": "Pending qty.",
+  "Qtd. defeito": "Defect qty.",
+  Status: "Status",
+  "Custo / prioridade": "Cost / priority",
+  "Progresso geral": "Overall progress",
+  "Ver todas as ocorrências": "View all occurrences",
+  Ocorrências: "Occurrences",
+  "Histórico de bloqueios": "Block history",
+  "Buscar ocorrência ou defeito": "Search occurrence or defect",
+  "Limpar filtros": "Clear filters",
+  "Produto / linha": "Product / line",
+  Responsável: "Owner",
+  Quantidades: "Quantities",
+  Ação: "Action",
+  Todos: "All",
+  Iniciado: "Started",
+  Pendente: "Pending",
+  Finalizado: "Finished",
+  "Editar bloqueio": "Edit block",
+  "Quantidade bloqueada": "Blocked quantity",
+  "Problema / defeito": "Problem / defect",
+  Descrição: "Description",
+  "Pessoa responsável": "Owner",
   "Aluguel dos containers por hora (R$)": "Container rental per hour (BRL)",
-  "Atraso da venda por hora (R$)": "Sales delay per hour (BRL)", "Cancelar": "Cancel",
-  "Salvar alterações": "Save changes", "Dashboard": "Dashboard", "Operação": "Operation",
-  "Gestão": "Management", "Usuários e perfis": "Users and profiles", "Sair": "Sign out",
-  "Acesso interno": "Internal access", "Acesso ao sistema": "System access", "E-mail": "Email",
-  "Senha": "Password", "Perfil de acesso": "Access profile", "Selecione seu perfil": "Select your profile",
-  "Qualidade": "Quality", "Engenharia": "Engineering", "Produção": "Production",
-  "Expedição": "Shipping", "Entrar no Rework": "Sign in", "Mostrar": "Show", "Ocultar": "Hide",
-  "Abrir Dashboard": "Open Dashboard", "Acesso da Produção": "Production access",
-  "Criar retrabalho": "Create rework", "Novo bloqueio": "New block", "Dados do bloqueio": "Block data",
-  "Continuar": "Continue", "Voltar": "Back", "Criar bloqueio": "Create block",
-  "Método de retrabalho": "Rework method", "Possível causa": "Possible cause", "Categoria": "Category",
-  "Departamento responsável": "Responsible department", "Containers e quantidades": "Containers and quantities",
-  "Adicionar container": "Add container", "Bipagem de seriais": "Serial scanning", "Número de série": "Serial number",
-  "Registrar NG": "Register NG", "Registrar OK": "Register OK", "Inspecionados": "Inspected",
-  "Pendentes": "Pending", "Tema": "Theme", "Idioma": "Language", "Sistema": "System",
-  "Claro": "Light", "Escuro": "Dark", "Português": "Portuguese", "Inglês": "English",
-  "Baixa": "Low", "Média": "Medium", "Alta": "High", "Editar custos": "Edit costs",
-  "Custo acumulado": "Accumulated cost", "Defeitos encontrados": "Defects found",
-  "Excluir": "Delete", "Serial inicial": "Initial serial", "Serial final": "Final serial",
-  "Relatórios": "Reports", "Relatório de ocorrências": "Occurrence report",
-  "Data inicial": "Start date", "Data final": "End date", "Todas": "All",
-  "Gerar relatório": "Generate report", "Exportar CSV": "Export CSV",
-  "Imprimir / salvar PDF": "Print / save PDF", "Ocorrências incluídas": "Included occurrences",
-  "Prioridade": "Priority", "Prioridade alta": "High priority", "Limpar": "Clear",
+  "Atraso da venda por hora (R$)": "Sales delay per hour (BRL)",
+  Cancelar: "Cancel",
+  "Salvar alterações": "Save changes",
+  Dashboard: "Dashboard",
+  Operação: "Operation",
+  Gestão: "Management",
+  "Usuários e perfis": "Users and profiles",
+  Sair: "Sign out",
+  "Acesso interno": "Internal access",
+  "Acesso ao sistema": "System access",
+  "E-mail": "Email",
+  Senha: "Password",
+  "Perfil de acesso": "Access profile",
+  "Selecione seu perfil": "Select your profile",
+  Qualidade: "Quality",
+  Engenharia: "Engineering",
+  Produção: "Production",
+  Expedição: "Shipping",
+  "Entrar no Rework": "Sign in",
+  Mostrar: "Show",
+  Ocultar: "Hide",
+  "Abrir Dashboard": "Open Dashboard",
+  "Acesso da Produção": "Production access",
+  "Criar retrabalho": "Create rework",
+  "Novo bloqueio": "New block",
+  "Dados do bloqueio": "Block data",
+  Continuar: "Continue",
+  Voltar: "Back",
+  "Criar bloqueio": "Create block",
+  "Método de retrabalho": "Rework method",
+  "Possível causa": "Possible cause",
+  Categoria: "Category",
+  "Departamento responsável": "Responsible department",
+  "Containers e quantidades": "Containers and quantities",
+  "Adicionar container": "Add container",
+  "Bipagem de seriais": "Serial scanning",
+  "Número de série": "Serial number",
+  "Registrar NG": "Register NG",
+  "Registrar OK": "Register OK",
+  Inspecionados: "Inspected",
+  Pendentes: "Pending",
+  Tema: "Theme",
+  Idioma: "Language",
+  Sistema: "System",
+  Claro: "Light",
+  Escuro: "Dark",
+  Português: "Portuguese",
+  Inglês: "English",
+  Baixa: "Low",
+  Média: "Medium",
+  Alta: "High",
+  "Editar custos": "Edit costs",
+  "Custo acumulado": "Accumulated cost",
+  "Defeitos encontrados": "Defects found",
+  Excluir: "Delete",
+  "Serial inicial": "Initial serial",
+  "Serial final": "Final serial",
+  Relatórios: "Reports",
+  "Relatório de ocorrências": "Occurrence report",
+  "Data inicial": "Start date",
+  "Data final": "End date",
+  Todas: "All",
+  "Gerar relatório": "Generate report",
+  "Exportar CSV": "Export CSV",
+  "Imprimir / salvar PDF": "Print / save PDF",
+  "Ocorrências incluídas": "Included occurrences",
+  Prioridade: "Priority",
+  "Prioridade alta": "High priority",
+  Limpar: "Clear",
 };
 
 const preferenceLanguage = () => {
   const selectedLanguage = localStorage.getItem("rework-language") || "system";
   return selectedLanguage === "system"
-    ? (navigator.language || "pt-BR").toLowerCase().startsWith("en") ? "en" : "pt"
+    ? (navigator.language || "pt-BR").toLowerCase().startsWith("en")
+      ? "en"
+      : "pt"
     : selectedLanguage;
 };
 
@@ -252,7 +337,10 @@ function translatePage() {
     if (["SCRIPT", "STYLE"].includes(node.parentElement?.tagName)) return;
     const original = node.textContent.trim();
     if (!ENGLISH[original]) return;
-    if (node.parentElement?.tagName === "OPTION" && !node.parentElement.hasAttribute("value"))
+    if (
+      node.parentElement?.tagName === "OPTION" &&
+      !node.parentElement.hasAttribute("value")
+    )
       node.parentElement.value = original;
     node.textContent = node.textContent.replace(original, ENGLISH[original]);
   });
@@ -262,35 +350,53 @@ function translatePage() {
       "Modelo, linha, problema ou defeito": "Model, line, problem or defect",
       "Bipe ou digite o serial": "Scan or enter the serial",
     };
-    if (placeholders[field.placeholder]) field.placeholder = placeholders[field.placeholder];
+    if (placeholders[field.placeholder])
+      field.placeholder = placeholders[field.placeholder];
   });
 }
 
 // Preferências globais: tema, idioma e menu lateral recolhido.
 function initPreferences() {
   const themeSetting = localStorage.getItem("rework-theme") || "system";
-  const dark = themeSetting === "dark" || (themeSetting === "system" && matchMedia("(prefers-color-scheme: dark)").matches);
+  const dark =
+    themeSetting === "dark" ||
+    (themeSetting === "system" &&
+      matchMedia("(prefers-color-scheme: dark)").matches);
   document.documentElement.dataset.theme = dark ? "dark" : "light";
-  document.body.insertAdjacentHTML("afterbegin", `
+  document.body.insertAdjacentHTML(
+    "afterbegin",
+    `
     <div class="ui-preferences" aria-label="Preferências da interface">
       <label><span>Tema</span><select id="themePreference"><option value="system">Sistema</option><option value="light">Claro</option><option value="dark">Escuro</option></select></label>
       <label><span>Idioma</span><select id="languagePreference"><option value="system">Sistema</option><option value="pt">Português</option><option value="en">Inglês</option></select></label>
-    </div>`);
+    </div>`,
+  );
   const theme = document.querySelector("#themePreference");
   const language = document.querySelector("#languagePreference");
   theme.value = themeSetting;
   language.value = localStorage.getItem("rework-language") || "system";
-  theme.onchange = () => { localStorage.setItem("rework-theme", theme.value); location.reload(); };
-  language.onchange = () => { localStorage.setItem("rework-language", language.value); location.reload(); };
-  if (localStorage.getItem("rework-sidebar") === "collapsed") document.body.classList.add("sidebar-collapsed");
+  theme.onchange = () => {
+    localStorage.setItem("rework-theme", theme.value);
+    location.reload();
+  };
+  language.onchange = () => {
+    localStorage.setItem("rework-language", language.value);
+    location.reload();
+  };
+  if (localStorage.getItem("rework-sidebar") === "collapsed")
+    document.body.classList.add("sidebar-collapsed");
 }
 
 const NAV_ICONS = {
-  dashboard: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13h6V4H4v9Zm0 7h6v-5H4v5Zm10 0h6v-9h-6v9Zm0-16v5h6V4h-6Z"/></svg>',
-  occurrences: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6Zm4 5h10v2H7v-2Zm0 4h7v2H7v-2Z"/></svg>',
+  dashboard:
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13h6V4H4v9Zm0 7h6v-5H4v5Zm10 0h6v-9h-6v9Zm0-16v5h6V4h-6Z"/></svg>',
+  occurrences:
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6Zm4 5h10v2H7v-2Zm0 4h7v2H7v-2Z"/></svg>',
   new: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6V5Z"/></svg>',
-  users: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm6.5 1a3.5 3.5 0 1 0 0-7 5.8 5.8 0 0 1 0 7ZM2 20v-2c0-3 3.1-5 7-5s7 2 7 5v2H2Zm15.5 0v-2c0-1.6-.6-3-1.7-4 3.3.1 6.2 1.7 6.2 4v2h-4.5Z"/></svg>',
-  reports: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm2 13h2v2H7v-2Zm0-5h2v4H7v-4Zm4 2h2v5h-2v-5Zm4-6h2v11h-2V7Z"/></svg>',
+  users:
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm6.5 1a3.5 3.5 0 1 0 0-7 5.8 5.8 0 0 1 0 7ZM2 20v-2c0-3 3.1-5 7-5s7 2 7 5v2H2Zm15.5 0v-2c0-1.6-.6-3-1.7-4 3.3.1 6.2 1.7 6.2 4v2h-4.5Z"/></svg>',
+  reports:
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm2 13h2v2H7v-2Zm0-5h2v4H7v-4Zm4 2h2v5h-2v-5Zm4-6h2v11h-2V7Z"/></svg>',
 };
 
 // Controla o login e o acesso público da Produção.
@@ -334,7 +440,12 @@ function renderShell() {
           ["occurrences", "Ocorrências", "ocorrencias.html", "occurrences"],
         ];
   if (profile === "Qualidade")
-    operational.push(["new", "Criar ocorrência", "nova-ocorrencia.html", "new"]);
+    operational.push([
+      "new",
+      "Criar ocorrência",
+      "nova-ocorrencia.html",
+      "new",
+    ]);
   sidebar.className = "sidebar";
   sidebar.innerHTML = `
     <div class="sidebar-head"><div class="brand-mark"><span>R</span><strong>REWORK</strong></div><button id="toggleSidebar" class="sidebar-toggle" type="button" aria-label="Recolher menu" title="Recolher menu">‹</button></div>
@@ -363,7 +474,9 @@ function bindGlobal() {
     document.body.classList.toggle("sidebar-collapsed");
     localStorage.setItem(
       "rework-sidebar",
-      document.body.classList.contains("sidebar-collapsed") ? "collapsed" : "expanded",
+      document.body.classList.contains("sidebar-collapsed")
+        ? "collapsed"
+        : "expanded",
     );
   });
 }
@@ -375,8 +488,15 @@ function statusBadge(occurrence) {
       : occurrence.status === "Iniciado"
         ? "started"
         : "pending";
-  const labels = { Finalizado: "Finished", Iniciado: "Started", Pendente: "Pending" };
-  const label = preferenceLanguage() === "en" ? labels[occurrence.status] : occurrence.status;
+  const labels = {
+    Finalizado: "Finished",
+    Iniciado: "Started",
+    Pendente: "Pending",
+  };
+  const label =
+    preferenceLanguage() === "en"
+      ? labels[occurrence.status]
+      : occurrence.status;
   return `<span class="badge ${style}">${esc(label)}</span>`;
 }
 
@@ -398,9 +518,13 @@ function occurrenceRows(list) {
     .map(
       (occurrence) => `
     <tr>
-      <td>${profile === "Qualidade" || profile === "Expedição" ? `<button class="folder-button" type="button" data-edit="${occurrence.id}" aria-label="Editar ${occurrence.id}" title="Editar ${occurrence.id}">
+      <td>${
+        profile === "Qualidade" || profile === "Expedição"
+          ? `<button class="folder-button" type="button" data-edit="${occurrence.id}" aria-label="Editar ${occurrence.id}" title="Editar ${occurrence.id}">
         <span aria-hidden="true">📁</span><small>${occurrence.id}</small>
-      </button>` : `<span class="folder-reference">📁 <small>${occurrence.id}</small></span>`}</td>
+      </button>`
+          : `<span class="folder-reference">📁 <small>${occurrence.id}</small></span>`
+      }</td>
       <td><strong>${esc(occurrence.model)}</strong><small class="cell-detail">Linha ${esc(occurrence.line)}</small></td>
       <td>${occurrence.date}</td>
       <td class="wrap"><strong>${esc(occurrence.defect)}</strong><small class="cell-detail">${esc(occurrence.classification)} · ${esc(occurrence.area)}</small></td>
@@ -511,9 +635,13 @@ function initOccurrences() {
     const editStatus = document.querySelector("#editFormStatus");
     if (
       profile === "Qualidade" &&
-      serialStart.localeCompare(serialEnd, undefined, { numeric: true, sensitivity: "base" }) > 0
+      serialStart.localeCompare(serialEnd, undefined, {
+        numeric: true,
+        sensitivity: "base",
+      }) > 0
     ) {
-      editStatus.textContent = "O serial final deve ser igual ou posterior ao serial inicial.";
+      editStatus.textContent =
+        "O serial final deve ser igual ou posterior ao serial inicial.";
       return;
     }
     editStatus.textContent = "";
@@ -531,8 +659,12 @@ function initOccurrences() {
         occurrence.resolvedAt = new Date().toISOString();
       if (occurrence.status !== "Finalizado") occurrence.resolvedAt = null;
     }
-    occurrence.containerHourlyCost = Number(values.get("containerHourlyCost") || 0);
-    occurrence.salesDelayHourlyCost = Number(values.get("salesDelayHourlyCost") || 0);
+    occurrence.containerHourlyCost = Number(
+      values.get("containerHourlyCost") || 0,
+    );
+    occurrence.salesDelayHourlyCost = Number(
+      values.get("salesDelayHourlyCost") || 0,
+    );
     save(data);
     dialog.close();
     render();
@@ -545,11 +677,16 @@ function initDashboard() {
   const metrics = document.querySelector("#dashboardMetrics");
   if (!metrics) return;
   const data = read();
-  const open = data.filter((item) => ["Iniciado", "Pendente"].includes(item.status));
+  const open = data.filter((item) =>
+    ["Iniciado", "Pendente"].includes(item.status),
+  );
   const blocked = open.reduce((total, item) => total + item.blocked, 0);
   const checked = open.reduce((total, item) => total + inspected(item), 0);
   const ng = open.reduce((total, item) => total + defects(item), 0);
-  const totalCost = open.reduce((total, item) => total + accumulatedCost(item), 0);
+  const totalCost = open.reduce(
+    (total, item) => total + accumulatedCost(item),
+    0,
+  );
   metrics.innerHTML = `
     <article class="metric-card"><span>Bloqueios abertos</span><strong>${open.length}</strong><small>ocorrências em acompanhamento</small></article>
     <article class="metric-card"><span>Unidades bloqueadas</span><strong>${num(blocked)}</strong><small>nos bloqueios abertos</small></article>
@@ -597,13 +734,15 @@ function initMethod() {
     attachment.innerHTML = occurrence.methodFile
       ? `<div class="attachment-row"><div><strong>${esc(occurrence.methodFile.name)}</strong><small>${esc(occurrence.methodFile.type || "Arquivo do método")}</small></div><div class="table-actions"><a class="secondary" href="${occurrence.methodFile.data}" download="${esc(occurrence.methodFile.name)}">Baixar</a><button id="removeMethodFile" class="danger" type="button">Remover</button></div></div>`
       : `<p class="muted">Nenhum arquivo anexado a esta ocorrência.</p>`;
-    document.querySelector("#removeMethodFile")?.addEventListener("click", () => {
-      occurrence.methodFile = null;
-      const data = read();
-      data[data.findIndex((item) => item.id === occurrence.id)] = occurrence;
-      save(data);
-      renderAttachment();
-    });
+    document
+      .querySelector("#removeMethodFile")
+      ?.addEventListener("click", () => {
+        occurrence.methodFile = null;
+        const data = read();
+        data[data.findIndex((item) => item.id === occurrence.id)] = occurrence;
+        save(data);
+        renderAttachment();
+      });
   };
   renderAttachment();
   ["cause", "method", "classification", "department", "person"].forEach(
@@ -811,10 +950,21 @@ function initReports() {
         (!line.value || item.line === line.value)
       );
     });
-    const totalBlocked = reportData.reduce((total, item) => total + item.blocked, 0);
-    const totalPending = reportData.reduce((total, item) => total + pending(item), 0);
-    const totalCost = reportData.reduce((total, item) => total + accumulatedCost(item), 0);
-    const highPriorities = reportData.filter((item) => priority(item).level === "high").length;
+    const totalBlocked = reportData.reduce(
+      (total, item) => total + item.blocked,
+      0,
+    );
+    const totalPending = reportData.reduce(
+      (total, item) => total + pending(item),
+      0,
+    );
+    const totalCost = reportData.reduce(
+      (total, item) => total + accumulatedCost(item),
+      0,
+    );
+    const highPriorities = reportData.filter(
+      (item) => priority(item).level === "high",
+    ).length;
     document.querySelector("#reportMetrics").innerHTML = `
       <article class="metric-card"><span>Ocorrências</span><strong>${reportData.length}</strong><small>registros selecionados</small></article>
       <article class="metric-card"><span>Quantidade bloqueada</span><strong>${num(totalBlocked)}</strong><small>unidades no período</small></article>
@@ -829,12 +979,16 @@ function initReports() {
         })
         .join("") ||
       `<tr><td colspan="10" class="empty">Nenhuma ocorrência encontrada para os filtros selecionados.</td></tr>`;
-    const periodStart = start.value ? fromIsoDate(start.value) : "início dos registros";
+    const periodStart = start.value
+      ? fromIsoDate(start.value)
+      : "início dos registros";
     const periodEnd = end.value ? fromIsoDate(end.value) : "hoje";
-    document.querySelector("#reportPeriod").textContent = `Período: ${periodStart} até ${periodEnd}`;
+    document.querySelector("#reportPeriod").textContent =
+      `Período: ${periodStart} até ${periodEnd}`;
     document.querySelector("#reportGeneratedAt").textContent =
       `Gerado em ${new Date().toLocaleString("pt-BR")}`;
-    document.querySelector("#reportCount").textContent = `${reportData.length} registro(s)`;
+    document.querySelector("#reportCount").textContent =
+      `${reportData.length} registro(s)`;
     translatePage();
   };
 
@@ -853,13 +1007,36 @@ function initReports() {
       if (/^[=+\-@]/.test(safeValue)) safeValue = `'${safeValue}`;
       return `"${safeValue.replaceAll('"', '""')}"`;
     };
-    const headers = ["ID", "Data", "Linha", "Modelo", "Problema", "Bloqueada", "Pendente", "Status", "Custo", "Prioridade"];
+    const headers = [
+      "ID",
+      "Data",
+      "Linha",
+      "Modelo",
+      "Problema",
+      "Bloqueada",
+      "Pendente",
+      "Status",
+      "Custo",
+      "Prioridade",
+    ];
     const rows = reportData.map((item) => [
-      item.id, item.date, item.line, item.model, item.defect, item.blocked,
-      pending(item), item.status, accumulatedCost(item).toFixed(2), priority(item).label,
+      item.id,
+      item.date,
+      item.line,
+      item.model,
+      item.defect,
+      item.blocked,
+      pending(item),
+      item.status,
+      accumulatedCost(item).toFixed(2),
+      priority(item).label,
     ]);
-    const csv = [headers, ...rows].map((row) => row.map(csvCell).join(";")).join("\r\n");
-    const url = URL.createObjectURL(new Blob(["\ufeff", csv], { type: "text/csv;charset=utf-8" }));
+    const csv = [headers, ...rows]
+      .map((row) => row.map(csvCell).join(";"))
+      .join("\r\n");
+    const url = URL.createObjectURL(
+      new Blob(["\ufeff", csv], { type: "text/csv;charset=utf-8" }),
+    );
     const link = document.createElement("a");
     link.href = url;
     link.download = `relatorio-ocorrencias-${new Date().toISOString().slice(0, 10)}.csv`;
@@ -875,6 +1052,8 @@ function initNew() {
   if (!form) return;
   const step1 = document.querySelector("#step1");
   const step2 = document.querySelector("#step2");
+  const stepMark1 = document.querySelector("#stepMark1");
+  const stepMark2 = document.querySelector("#stepMark2");
   const rows = document.querySelector("#containerRows");
   const addRow = () => {
     const row = document.createElement("div");
@@ -894,23 +1073,33 @@ function initNew() {
       return;
     step1.hidden = true;
     step2.hidden = false;
+    stepMark1.classList.remove("active");
+    stepMark2.classList.add("active");
+    document.querySelector("#step2Title").focus();
   };
   document.querySelector("#backStep").onclick = () => {
     step2.hidden = true;
     step1.hidden = false;
+    stepMark2.classList.remove("active");
+    stepMark1.classList.add("active");
   };
   form.onsubmit = (event) => {
     event.preventDefault();
     if (!form.reportValidity()) return;
     const values = new FormData(form);
     const data = read();
-    const id = `RW-${String(Math.max(...data.map((item) => Number(item.id.split("-")[1]))) + 1).padStart(3, "0")}`;
-    const containers = values
-      .getAll("containerId")
-      .map((value, index) => ({
-        id: value,
-        qty: Number(values.getAll("containerQty")[index]),
-      }));
+    const serialStart = values.get("serialStart").trim();
+    const serialEnd = values.get("serialEnd").trim();
+    const blocked = Number(values.get("blocked"));
+    const detected = Number(values.get("detected"));
+    const currentIds = data
+      .map((item) => Number(item.id.split("-")[1]))
+      .filter(Number.isFinite);
+    const id = `RW-${String(Math.max(0, ...currentIds) + 1).padStart(3, "0")}`;
+    const containers = values.getAll("containerId").map((value, index) => ({
+      id: value,
+      qty: Number(values.getAll("containerQty")[index]),
+    }));
     const occurrence = {
       id,
       date: new Date().toLocaleDateString("pt-BR"),
@@ -918,12 +1107,12 @@ function initNew() {
       part: values.get("part"),
       defect: values.get("defect"),
       description: values.get("description"),
-      serialStart: values.get("serialStart"),
-      serialEnd: values.get("serialEnd"),
-      blocked: Number(values.get("blocked")),
+      serialStart,
+      serialEnd,
+      blocked,
       model: values.get("model"),
       area: values.get("area"),
-      detected: Number(values.get("detected")),
+      detected,
       classification: values.get("classification"),
       department: values.get("department"),
       person: values.get("person"),
@@ -936,11 +1125,27 @@ function initNew() {
       containers,
       scans: [],
     };
+    const newStatus = document.querySelector("#newStatus");
+    if (
+      serialStart.localeCompare(serialEnd, undefined, {
+        numeric: true,
+        sensitivity: "base",
+      }) > 0
+    ) {
+      newStatus.textContent =
+        "O serial final deve ser igual ou posterior ao serial inicial.";
+      return;
+    }
+    if (detected > blocked) {
+      newStatus.textContent =
+        "A quantidade detectada não pode superar a quantidade bloqueada.";
+      return;
+    }
     if (
       containers.reduce((total, item) => total + item.qty, 0) !==
       occurrence.blocked
     ) {
-      document.querySelector("#newStatus").textContent =
+      newStatus.textContent =
         "A soma dos containers deve ser igual à quantidade bloqueada.";
       return;
     }
@@ -969,10 +1174,17 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
   const allowedPages = {
-    Engenharia: ["dashboard.html", "ocorrencias.html", "metodo-retrabalho.html"],
+    Engenharia: [
+      "dashboard.html",
+      "ocorrencias.html",
+      "metodo-retrabalho.html",
+    ],
     Expedição: ["dashboard.html", "ocorrencias.html"],
   };
-  if (allowedPages[activeProfile] && !allowedPages[activeProfile].includes(page)) {
+  if (
+    allowedPages[activeProfile] &&
+    !allowedPages[activeProfile].includes(page)
+  ) {
     location.replace("dashboard.html");
     return;
   }

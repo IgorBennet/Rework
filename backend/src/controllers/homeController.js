@@ -1,6 +1,6 @@
-// Resposta simples usada para verificar se a API está ativa.
+// Resposta usada por monitoramento e testes para verificar a API.
 function showHome(_request, response) {
-  return response.send("API Rework funcionando");
+  return response.json({ status: "ok", service: "Rework API" });
 }
 
 module.exports = {

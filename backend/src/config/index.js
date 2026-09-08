@@ -1,4 +1,4 @@
-// Configurações básicas compartilhadas pelo backend.
+// Configurações compartilhadas pelo backend.
 module.exports = {
-  port: 3000,
+  port: Number(process.env.PORT) || 3000,
 };
