@@ -506,9 +506,33 @@ function occurrenceActions(occurrence, profile) {
     return `<button class="table-link" type="button" data-edit="${occurrence.id}">${en ? "Edit costs" : "Editar custos"}</button>`;
   if (profile === "Engenharia")
     return `<a href="metodo-retrabalho.html${params(occurrence.id)}" data-select="${occurrence.id}">${occurrence.method ? "Método / arquivo" : "Definir método"}</a>`;
-  return occurrence.method
+  const actions = occurrence.method
     ? `<a href="seriais.html${params(occurrence.id)}" data-select="${occurrence.id}">Bipar</a><a href="metodo-retrabalho.html${params(occurrence.id)}" data-select="${occurrence.id}">Arquivo</a>`
     : `<a href="metodo-retrabalho.html${params(occurrence.id)}" data-select="${occurrence.id}">Definir método</a>`;
+  return actions + (profile === "Qualidade"
+    ? `<button class="danger compact-action" type="button" data-delete-occurrence="${esc(occurrence.id)}" aria-label="${en ? "Delete occurrence" : "Excluir ocorrência"} ${esc(occurrence.id)}">${en ? "Delete" : "Excluir"}</button>`
+    : "");
+}
+
+// Confere o perfil novamente antes de excluir os dados locais.
+function deleteOccurrence(id) {
+  if (sessionStorage.getItem("rework-profile") !== "Qualidade") return false;
+  const occurrence = read().find((item) => item.id === id);
+  if (!occurrence) return false;
+  const en = preferenceLanguage() === "en";
+  if (!window.confirm(en
+    ? `Delete occurrence ${id} (${occurrence.defect})? Its containers, scans and method attachment will also be deleted. This cannot be undone.`
+    : `Excluir a ocorrência ${id} (${occurrence.defect})? Seus containers, bipagens e anexo do método também serão excluídos. Esta ação não pode ser desfeita.`)) return false;
+  if (sessionStorage.getItem("rework-profile") !== "Qualidade") return false;
+  try {
+    save(read().filter((item) => item.id !== id));
+  } catch {
+    window.alert(en ? "Unable to delete the occurrence. Please try again." : "Não foi possível excluir a ocorrência. Tente novamente.");
+    return false;
+  }
+  if (localStorage.getItem("rework-selected") === id)
+    localStorage.removeItem("rework-selected");
+  return true;
 }
 
 // Monta as linhas compactas da tabela de ocorrências.
@@ -609,6 +633,13 @@ function initOccurrences() {
       .forEach(
         (button) => (button.onclick = () => openEditor(button.dataset.edit)),
       );
+    body.querySelectorAll("[data-delete-occurrence]").forEach((button) => {
+      button.onclick = () => {
+        if (!deleteOccurrence(button.dataset.deleteOccurrence)) return;
+        data = read();
+        render();
+      };
+    });
     body
       .querySelectorAll("[data-select]")
       .forEach((link) => (link.onclick = () => choose(link.dataset.select)));
@@ -723,6 +754,10 @@ function initMethod() {
   const form = document.querySelector("#methodForm");
   if (!form) return;
   const occurrence = getCurrent();
+  if (!occurrence) {
+    location.replace("ocorrencias.html");
+    return;
+  }
   choose(occurrence.id);
   setLinks(occurrence);
   document.querySelector("#methodId").textContent = occurrence.id;
@@ -790,6 +825,10 @@ function initScans() {
   const form = document.querySelector("#scanForm");
   if (!form) return;
   const occurrence = getCurrent();
+  if (!occurrence) {
+    location.replace("ocorrencias.html");
+    return;
+  }
   choose(occurrence.id);
   setLinks(occurrence);
   const input = document.querySelector("#serialScan");
@@ -883,6 +922,10 @@ function initContainers() {
   const host = document.querySelector("#containerContent");
   if (!host) return;
   const occurrence = getCurrent();
+  if (!occurrence) {
+    location.replace("ocorrencias.html");
+    return;
+  }
   choose(occurrence.id);
   setLinks(occurrence);
   document.querySelector("#containerId").textContent = occurrence.id;
@@ -894,6 +937,10 @@ function initDetail() {
   const host = document.querySelector("#detailContent");
   if (!host) return;
   const occurrence = getCurrent();
+  if (!occurrence) {
+    location.replace("ocorrencias.html");
+    return;
+  }
   choose(occurrence.id);
   setLinks(occurrence);
   document.querySelector("#pageId").textContent = occurrence.id;

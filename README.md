@@ -17,7 +17,7 @@ Abra `http://localhost:3000` no navegador. Para usar outra porta, defina a vari�
 ## Perfis demonstrativos
 
 - **Produção:** abre o Dashboard público, sem login, apenas para consulta.
-- **Qualidade:** cria e edita ocorrências, define métodos, realiza bipagens, administra usuários e gera relatórios.
+- **Qualidade:** cria, edita e exclui ocorrências, define métodos, realiza bipagens, administra usuários e gera relatórios.
 - **Engenharia:** consulta ocorrências e inclui o método e o arquivo de retrabalho.
 - **Expedição:** consulta ocorrências e informa os custos de containers e de atraso de vendas.
 
