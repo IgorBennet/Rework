@@ -1,34 +1,30 @@
 # Backend Rework
 
-API inicial do projeto Rework, desenvolvida com Node.js e Express.
+Servidor Node.js com Express responsável por publicar o frontend e disponibilizar o endpoint de diagnóstico da API.
 
-## Pré-requisitos
+## Requisitos
 
-- Node.js 22 ou superior
+- Node.js 18 ou superior
 - npm
 
-## Instalação
+## Instalação e execução
 
-Entre na pasta do backend e instale as dependências:
-
-```bash
-cd backend
-npm install
+```powershell
+npm.cmd install
+npm.cmd start
 ```
 
-## Executando o servidor
+O servidor utiliza a porta `3000` por padrão. A variável de ambiente `PORT` permite configurar outra porta.
 
-Para iniciar normalmente:
+## Endereços
 
-```bash
-npm start
+- `GET /`: abre o frontend Rework.
+- `GET /api/health`: retorna o estado do serviço em JSON.
+
+## Desenvolvimento
+
+```powershell
+npm.cmd run dev
 ```
 
-Para iniciar em modo de desenvolvimento, reiniciando após alterações:
-
-```bash
-npm run dev
-```
-
-O servidor estará disponível em `http://localhost:3000`. A rota `GET /`
-responde com `API Rework funcionando`.
+O modo de desenvolvimento reinicia o servidor quando os arquivos do backend são alterados. A persistência das ocorrências continua sendo local no navegador nesta etapa do projeto.

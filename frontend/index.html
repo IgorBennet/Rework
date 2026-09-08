@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Acesso ao sistema Rework." />
+    <title>Rework | Acesso</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="login-page">
+    <a class="skip-link" href="#login">Ir para o acesso</a>
+    <main class="login-shell">
+      <!-- Apresentação e acesso público da Produção. -->
+      <section class="login-story" aria-labelledby="story-title">
+        <div class="brand-mark" aria-label="Rework">
+          <span>R</span><strong>REWORK</strong>
+        </div>
+        <div class="story-copy">
+          <p class="kicker">Gestão de retrabalhos</p>
+          <h1 id="story-title">
+            O problema não some quando a linha volta a rodar.
+          </h1>
+          <p>
+            Ocorrências, quantidades, métodos e responsabilidades reunidos em
+            uma visão clara.
+          </p>
+        </div>
+        <div class="production-guide">
+          <span class="profile-dot production" aria-hidden="true"></span>
+          <div>
+            <strong>Acesso da Produção</strong>
+            <p>Consulte resultados e o andamento geral sem precisar entrar.</p>
+          </div>
+          <a
+            id="publicDashboard"
+            class="public-dashboard-button"
+            href="dashboard.html"
+            >Abrir Dashboard</a
+          >
+        </div>
+      </section>
+
+      <!-- Login reservado para Qualidade, Engenharia e Expedição. -->
+      <section class="login-card" aria-labelledby="login-title">
+        <div class="login-card-head">
+          <p class="kicker">Acesso interno</p>
+          <h2 id="login-title">Acesso ao sistema</h2>
+          <p>Informe suas credenciais corporativas para continuar.</p>
+        </div>
+        <form id="login" class="login-form" novalidate>
+          <div class="field">
+            <label for="email">E-mail</label
+            ><input
+              id="email"
+              name="email"
+              type="email"
+              autocomplete="username"
+              placeholder="nome@rework.demo"
+              required
+            />
+          </div>
+          <div class="field">
+            <label for="password">Senha</label>
+            <div class="password-row">
+              <input
+                id="password"
+                name="password"
+                type="password"
+                autocomplete="current-password"
+                placeholder="Digite sua senha"
+                required
+                minlength="4"
+              /><button type="button" class="text-button" id="togglePassword">
+                Mostrar
+              </button>
+            </div>
+          </div>
+          <div class="field">
+            <label for="loginProfile">Perfil de acesso</label
+            ><select id="loginProfile" name="profile" required>
+              <option value="">Selecione seu perfil</option>
+              <option>Qualidade</option>
+              <option>Engenharia</option>
+              <option>Expedição</option>
+            </select>
+          </div>
+          <button class="primary wide" type="submit">Entrar no Rework</button>
+          <div
+            id="loginStatus"
+            class="status-message"
+            role="alert"
+            aria-live="polite"
+          ></div>
+        </form>
+      </section>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>
