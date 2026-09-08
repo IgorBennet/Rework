@@ -1,1 +1,91 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Rework | Bipagem</title><link rel="stylesheet" href="styles.css"></head><body class="app-body"><a class="skip-link" href="#main">Ir para o conteúdo</a><aside id="sidebar" data-active="scans"></aside><main id="main" class="app-main"><header class="page-top"><div><p class="kicker">Bloqueio <span id="scanId"></span></p><h1>Bipagem de seriais</h1><p id="scanRange"></p></div><a class="secondary" data-context-link="detalhes-ocorrencia.html">Voltar ao bloqueio</a></header><div id="scanGate" class="flow-gate" hidden><span>O método deste bloqueio ainda não foi definido.</span><a class="primary" data-context-link="metodo-retrabalho.html">Definir método</a></div><section class="content-grid"><form id="scanForm" class="panel span-8"><h2>Classificar aparelho</h2><div class="field scan-box"><label for="serialScan">Número de série</label><input id="serialScan" class="scan-input" autocomplete="off" autofocus placeholder="Bipe ou digite o serial"><small>Enter registra como OK. Use os botões para escolher o resultado.</small></div><div class="result-buttons scan-box"><button id="ngScan" class="ng-button" type="button">Registrar NG</button><button id="okScan" class="ok-button" type="button">Registrar OK</button></div><div id="scanStatus" class="status-message" role="status" aria-live="polite"></div></form><aside class="panel span-4"><h2>Andamento</h2><div class="summary-list" style="grid-template-columns:1fr 1fr"><div><span>Inspecionados</span><strong id="scanCount">0</strong></div><div><span>Pendentes</span><strong id="scanPending">0</strong></div></div></aside><article class="panel span-12"><h2>Leituras deste bloqueio</h2><div class="table-wrap"><table><thead><tr><th>Serial</th><th>Resultado</th><th>Data e hora</th><th>Responsável</th></tr></thead><tbody id="scanRows"></tbody></table></div></article></section></main><script src="app.js"></script></body></html>
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Rework | Bipagem</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="app-body">
+    <a class="skip-link" href="#main">Ir para o conteúdo</a>
+    <aside id="sidebar" data-active="scans"></aside>
+    <main id="main" class="app-main">
+      <header class="page-top">
+        <div>
+          <p class="kicker">Bloqueio <span id="scanId"></span></p>
+          <h1>Bipagem de seriais</h1>
+          <p id="scanRange"></p>
+        </div>
+        <a class="secondary" data-context-link="detalhes-ocorrencia.html"
+          >Voltar ao bloqueio</a
+        >
+      </header>
+      <!-- Bloqueia a bipagem enquanto o método não estiver definido. -->
+      <div id="scanGate" class="flow-gate" hidden>
+        <span>O método deste bloqueio ainda não foi definido.</span
+        ><a class="primary" data-context-link="metodo-retrabalho.html"
+          >Definir método</a
+        >
+      </div>
+      <!-- Entrada do serial, resumo e registros da inspeção. -->
+      <section class="content-grid">
+        <form id="scanForm" class="panel span-8">
+          <h2>Classificar aparelho</h2>
+          <div class="field scan-box">
+            <label for="serialScan">Número de série</label
+            ><input
+              id="serialScan"
+              class="scan-input"
+              autocomplete="off"
+              autofocus
+              placeholder="Bipe ou digite o serial"
+            /><small
+              >Enter registra como OK. Use os botões para escolher o
+              resultado.</small
+            >
+          </div>
+          <div class="result-buttons scan-box">
+            <button id="ngScan" class="ng-button" type="button">
+              Registrar NG</button
+            ><button id="okScan" class="ok-button" type="button">
+              Registrar OK
+            </button>
+          </div>
+          <div
+            id="scanStatus"
+            class="status-message"
+            role="status"
+            aria-live="polite"
+          ></div>
+        </form>
+        <aside class="panel span-4">
+          <h2>Andamento</h2>
+          <div class="summary-list" style="grid-template-columns: 1fr 1fr">
+            <div>
+              <span>Inspecionados</span><strong id="scanCount">0</strong>
+            </div>
+            <div><span>Pendentes</span><strong id="scanPending">0</strong></div>
+          </div>
+        </aside>
+        <article class="panel span-12">
+          <h2>Leituras deste bloqueio</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Serial</th>
+                  <th>Resultado</th>
+                  <th>Data e hora</th>
+                  <th>Responsável</th>
+                  <th>Ação</th>
+                </tr>
+              </thead>
+              <tbody id="scanRows"></tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>

@@ -1,1 +1,170 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Rework | Criar retrabalho</title><link rel="stylesheet" href="styles.css"></head><body class="app-body"><a class="skip-link" href="#main">Ir para o conteúdo</a><aside id="sidebar" data-active="new"></aside><main id="main" class="app-main"><header class="page-top"><div><p class="kicker">Novo bloqueio</p><h1>Criar retrabalho</h1><p>Preencha em duas etapas curtas. Campos com * são obrigatórios.</p></div></header><div class="stepper" aria-label="Etapas"><span id="stepMark1" class="step active"><b>1</b>Bloqueio</span><i class="step-line"></i><span id="stepMark2" class="step"><b>2</b>Fluxo e containers</span></div><form id="newOccurrence" novalidate><section id="step1" class="panel"><h2>Dados do bloqueio</h2><div class="form-grid three"><div class="field"><label for="line">Linha *</label><input id="line" name="line" placeholder="Ex.: VM02" required></div><div class="field"><label for="part">Parte / processo *</label><input id="part" name="part" placeholder="Ex.: Inspeção final" required></div><div class="field"><label for="defect">Defeito *</label><input id="defect" name="defect" required></div><div class="field full"><label for="description">Descrição *</label><textarea id="description" name="description" required></textarea></div><div class="field"><label for="serialStart">Serial inicial *</label><input id="serialStart" name="serialStart" required><small>Define o início da faixa aceita na bipagem.</small></div><div class="field"><label for="serialEnd">Serial final *</label><input id="serialEnd" name="serialEnd" required><small>Define o fim da faixa aceita na bipagem.</small></div><div class="field"><label for="blocked">Quantidade bloqueada *</label><input id="blocked" name="blocked" type="number" min="1" required></div><div class="field"><label for="model">Modelo *</label><input id="model" name="model" required></div><div class="field"><label for="area">Área solicitante *</label><input id="area" name="area" required></div><div class="field"><label for="detected">Quantidade detectada *</label><input id="detected" name="detected" type="number" min="1" required></div><div class="field"><label for="sector">Setor que bloqueou *</label><input id="sector" name="sector" required></div></div><div class="actions"><a class="secondary" href="ocorrencias.html">Cancelar</a><button id="nextStep" class="primary" type="button">Continuar</button></div></section><section id="step2" class="panel" hidden><h2 id="step2Title" tabindex="-1">Fluxo e containers</h2><div class="form-grid"><div class="field"><label for="cause">Possível causa</label><textarea id="cause" name="cause"></textarea></div><div class="field"><label for="method">Método de retrabalho</label><textarea id="method" name="method"></textarea><small>Pode ser definido mais tarde pela ação da tabela.</small></div><div class="field"><label for="classification">Categoria *</label><input id="classification" name="classification" required></div><div class="field"><label for="department">Departamento responsável *</label><input id="department" name="department" required><small>Campo livre.</small></div><div class="field"><label for="person">Pessoa responsável *</label><input id="person" name="person" required><small>Campo livre.</small></div></div><h3 style="margin-top:22px">Containers e quantidades</h3><p class="muted">A soma deve ser igual à quantidade bloqueada.</p><div id="containerRows"></div><button id="addContainer" class="secondary" type="button" style="margin-top:12px">Adicionar container</button><div id="newStatus" role="alert" aria-live="assertive" style="margin-top:15px"></div><div class="actions"><button id="backStep" class="secondary" type="button">Voltar</button><button class="primary" type="submit">Criar bloqueio</button></div></section></form></main><script src="app.js"></script></body></html>
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Rework | Criar retrabalho</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="app-body">
+    <a class="skip-link" href="#main">Ir para o conteúdo</a>
+    <aside id="sidebar" data-active="new"></aside>
+    <main id="main" class="app-main">
+      <header class="page-top">
+        <div>
+          <p class="kicker">Novo bloqueio</p>
+          <h1>Criar retrabalho</h1>
+          <p>Preencha em duas etapas curtas. Campos com * são obrigatórios.</p>
+        </div>
+      </header>
+      <div class="stepper" aria-label="Etapas">
+        <span id="stepMark1" class="step active"><b>1</b>Bloqueio</span
+        ><i class="step-line"></i
+        ><span id="stepMark2" class="step"><b>2</b>Fluxo e containers</span>
+      </div>
+      <!-- Cadastro dividido entre dados do bloqueio e fluxo de execução. -->
+      <form id="newOccurrence" novalidate>
+        <section id="step1" class="panel">
+          <h2>Dados do bloqueio</h2>
+          <div class="form-grid three">
+            <div class="field">
+              <label for="line">Linha *</label
+              ><input id="line" name="line" placeholder="Ex.: VM02" required />
+            </div>
+            <div class="field">
+              <label for="part">Parte / processo *</label
+              ><input
+                id="part"
+                name="part"
+                placeholder="Ex.: Inspeção final"
+                required
+              />
+            </div>
+            <div class="field">
+              <label for="defect">Defeito *</label
+              ><input id="defect" name="defect" required />
+            </div>
+            <div class="field full">
+              <label for="description">Descrição *</label
+              ><textarea
+                id="description"
+                name="description"
+                required
+              ></textarea>
+            </div>
+            <div class="field">
+              <label for="serialStart">Serial inicial *</label
+              ><input id="serialStart" name="serialStart" required /><small
+                >Define o início da faixa aceita na bipagem.</small
+              >
+            </div>
+            <div class="field">
+              <label for="serialEnd">Serial final *</label
+              ><input id="serialEnd" name="serialEnd" required /><small
+                >Define o fim da faixa aceita na bipagem.</small
+              >
+            </div>
+            <div class="field">
+              <label for="blocked">Quantidade bloqueada *</label
+              ><input
+                id="blocked"
+                name="blocked"
+                type="number"
+                min="1"
+                required
+              />
+            </div>
+            <div class="field">
+              <label for="model">Modelo *</label
+              ><input id="model" name="model" required />
+            </div>
+            <div class="field">
+              <label for="area">Área solicitante *</label
+              ><input id="area" name="area" required />
+            </div>
+            <div class="field">
+              <label for="detected">Quantidade detectada *</label
+              ><input
+                id="detected"
+                name="detected"
+                type="number"
+                min="1"
+                required
+              />
+            </div>
+          </div>
+          <div class="actions">
+            <a class="secondary" href="ocorrencias.html">Cancelar</a
+            ><button id="nextStep" class="primary" type="button">
+              Continuar
+            </button>
+          </div>
+        </section>
+        <section id="step2" class="panel" hidden>
+          <h2 id="step2Title" tabindex="-1">Fluxo e containers</h2>
+          <div class="method-fields">
+            <div class="field">
+              <label for="cause">Possível causa</label>
+              <input id="cause" name="cause" />
+            </div>
+            <div class="field">
+              <label for="method">Método de retrabalho</label>
+              <input id="method" name="method" />
+              <small>Pode ser definido mais tarde pela ação da tabela.</small>
+            </div>
+            <div class="field">
+              <label for="classification">Categoria *</label
+              ><input id="classification" name="classification" required />
+            </div>
+            <div class="field">
+              <label for="department">Departamento responsável *</label
+              ><input id="department" name="department" required /><small
+                >Campo livre.</small
+              >
+            </div>
+            <div class="field">
+              <label for="person">Pessoa responsável *</label
+              ><input id="person" name="person" required /><small
+                >Campo livre.</small
+              >
+            </div>
+            <div class="cost-fields">
+              <div class="field">
+                <label for="containerHourlyCost">Aluguel dos containers por hora (R$)</label>
+                <input id="containerHourlyCost" name="containerHourlyCost" type="number" min="0" step="0.01" value="0" />
+              </div>
+              <div class="field">
+                <label for="salesDelayHourlyCost">Atraso da venda por hora (R$)</label>
+                <input id="salesDelayHourlyCost" name="salesDelayHourlyCost" type="number" min="0" step="0.01" value="0" />
+              </div>
+              <small class="muted">Campos opcionais. A Expedição também pode preenchê-los depois.</small>
+            </div>
+          </div>
+          <h3 style="margin-top: 22px">Containers e quantidades</h3>
+          <p class="muted">A soma deve ser igual à quantidade bloqueada.</p>
+          <div id="containerRows"></div>
+          <button
+            id="addContainer"
+            class="secondary"
+            type="button"
+            style="margin-top: 12px"
+          >
+            Adicionar container
+          </button>
+          <div
+            id="newStatus"
+            class="status-message error"
+            role="alert"
+            aria-live="assertive"
+            style="margin-top: 15px"
+          ></div>
+          <div class="actions">
+            <button id="backStep" class="secondary" type="button">Voltar</button
+            ><button class="primary" type="submit">Criar bloqueio</button>
+          </div>
+        </section>
+      </form>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>

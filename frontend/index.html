@@ -1,66 +1,46 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Acesso ao protótipo Rework — gestão de ocorrências de retrabalho." />
-  <title>Rework | Entrar</title>
-  <link rel="stylesheet" href="styles.css" />
-</head>
-<body class="login-page">
-  <a class="skip-link" href="#login">Ir para o formulário de acesso</a>
-  <main class="login-shell">
-    <section class="login-story" aria-labelledby="story-title">
-      <div class="brand-mark" aria-label="Rework"><span>R</span><strong>REWORK</strong></div>
-      <div class="story-copy">
-        <p class="kicker">Gestão de retrabalhos</p>
-        <h1 id="story-title">O problema não some quando a linha volta a rodar.</h1>
-        <p>O Rework organiza o que ficou para trás: ocorrência, lote, container, serial, método, custo, tempo e responsabilidade.</p>
-      </div>
-      <div class="process-strip" aria-label="Fluxo resumido do sistema">
-        <span>01 Registrar</span><span>02 Rastrear</span><span>03 Priorizar</span><span>04 Resolver</span>
-      </div>
-      <p class="prototype-note">Protótipo acadêmico · dados demonstrativos</p>
-    </section>
-
-    <section class="login-card" aria-labelledby="login-title">
-      <div class="login-card-head">
-        <p class="kicker">Acesso ao sistema</p>
-        <h2 id="login-title">Bom trabalho.</h2>
-        <p>Entre com um perfil demonstrativo para navegar pelo protótipo.</p>
-      </div>
-
-      <form id="login" class="login-form" novalidate>
-        <div class="field">
-          <label for="email">E-mail corporativo</label>
-          <input id="email" name="email" type="email" autocomplete="username" placeholder="nome@empresa.com" required aria-describedby="emailError" />
-          <small id="emailError" class="field-error" aria-live="polite"></small>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Acesso ao sistema Rework." />
+    <title>Rework | Acesso</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="login-page">
+    <a class="skip-link" href="#login">Ir para o acesso</a>
+    <main class="login-shell">
+      <!-- Apresentação e acesso público da Produção. -->
+      <section class="login-story" aria-labelledby="story-title">
+        <div class="brand-mark" aria-label="Rework"><span>R</span><strong>REWORK</strong></div>
+        <div class="story-copy">
+          <p class="kicker">Gestão de retrabalhos</p>
+          <h1 id="story-title">O problema não some quando a linha volta a rodar.</h1>
+          <p>Ocorrências, quantidades, métodos e responsabilidades reunidos em uma visão clara.</p>
         </div>
-        <div class="field">
-          <label for="password">Senha</label>
-          <div class="password-row">
-            <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Digite sua senha" required minlength="4" aria-describedby="passwordError" />
-            <button type="button" class="text-button" id="togglePassword" aria-pressed="false">Mostrar</button>
-          </div>
-          <small id="passwordError" class="field-error" aria-live="polite"></small>
+        <div class="production-guide">
+          <span class="profile-dot production" aria-hidden="true"></span>
+          <div><strong>Acesso da Produção</strong><p>Consulte resultados e o andamento geral sem precisar entrar.</p></div>
+          <a id="publicDashboard" class="public-dashboard-button" href="dashboard.html">Abrir Dashboard</a>
         </div>
+      </section>
 
-        <div class="login-options">
-          <label class="check"><input type="checkbox" id="remember" /> <span>Lembrar neste dispositivo</span></label>
-          <button type="button" class="link-button" id="demoFill">Usar acesso demo</button>
+      <!-- Login reservado para Qualidade, Engenharia e Expedição. -->
+      <section class="login-card" aria-labelledby="login-title">
+        <div class="login-card-head">
+          <p class="kicker">Acesso interno</p>
+          <h2 id="login-title">Acesso ao sistema</h2>
+          <p>Informe suas credenciais corporativas para continuar.</p>
         </div>
-
-        <button class="primary wide" type="submit">Entrar no Rework</button>
-        <div id="loginStatus" class="status-message" role="status" aria-live="polite"></div>
-      </form>
-
-      <div class="access-cards" aria-label="Perfis do protótipo">
-        <article><span class="profile-dot quality" aria-hidden="true"></span><div><strong>Qualidade</strong><small>Cria e acompanha ocorrências</small></div></article>
-        <article><span class="profile-dot engineering" aria-hidden="true"></span><div><strong>Engenharia</strong><small>Define método de retrabalho</small></div></article>
-        <article><span class="profile-dot production" aria-hidden="true"></span><div><strong>Produção</strong><small>Consulta e acompanha</small></div></article>
-      </div>
-    </section>
-  </main>
-  <script src="app.js"></script>
-</body>
+        <form id="login" class="login-form" novalidate>
+          <div class="field"><label for="email">E-mail</label><input id="email" name="email" type="email" autocomplete="username" placeholder="nome@rework.demo" required /></div>
+          <div class="field"><label for="password">Senha</label><div class="password-row"><input id="password" name="password" type="password" autocomplete="current-password" placeholder="Digite sua senha" required minlength="4" /><button type="button" class="text-button" id="togglePassword">Mostrar</button></div></div>
+          <div class="field"><label for="loginProfile">Perfil de acesso</label><select id="loginProfile" name="profile" required><option value="">Selecione seu perfil</option><option>Qualidade</option><option>Engenharia</option><option>Expedição</option></select></div>
+          <button class="primary wide" type="submit">Entrar no Rework</button>
+          <div id="loginStatus" class="status-message" role="alert" aria-live="polite"></div>
+        </form>
+      </section>
+    </main>
+    <script src="app.js"></script>
+  </body>
 </html>
