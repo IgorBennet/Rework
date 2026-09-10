@@ -74,7 +74,7 @@
       </section>
     </main>
     <!-- Janela de edição aberta pelo ícone de pasta. -->
-    <dialog id="editOccurrence" class="edit-dialog">
+    <dialog id="editOccurrence" class="edit-dialog" aria-labelledby="editOccurrenceTitle">
       <form id="editOccurrenceForm">
         <header class="dialog-header">
           <div>
@@ -91,6 +91,7 @@
           </button>
         </header>
         <p id="editPermissionNote" class="notice" hidden></p>
+        <p class="muted">Preencha os dados obrigatórios. Custos são opcionais. Alterações de status, data, faixa ou quantidade serão apresentadas para confirmação.</p>
         <div class="form-grid">
           <div class="field">
             <label for="editModel">Modelo</label

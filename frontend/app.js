@@ -1,5 +1,127 @@
 const STORE = "rework-prototype-v3";
 const LEGACY_STORE = "rework-prototype-v2";
+let storageReadFailed = false;
+
+// Feedback persistente na tela e proteção dos formulários ainda não salvos.
+const formSnapshots = new WeakMap();
+const formSignature = (form) => JSON.stringify([...new FormData(form)].map(([key, value]) =>
+  [key, value instanceof File ? (value.name ? [value.name, value.size, value.lastModified] : null) : value]));
+const markClean = (form) => formSnapshots.set(form, formSignature(form));
+const isDirty = (form) => formSnapshots.has(form) && formSignature(form) !== formSnapshots.get(form);
+const pendingForms = () => [...document.querySelectorAll("form[data-protect]")].filter(isDirty);
+const uiText = (pt, en) => preferenceLanguage() === "en" ? en : pt;
+
+function feedback(message, error = false, target) {
+  let host = target || document.querySelector("#pageFeedback");
+  if (!host) {
+    host = document.createElement("div");
+    host.id = "pageFeedback";
+    host.setAttribute("role", "status");
+    host.setAttribute("aria-live", "polite");
+    document.querySelector("main").prepend(host);
+  }
+  host.className = `status-message feedback-box ${error ? "error" : "success"}`;
+  host.textContent = message;
+}
+
+function fieldError(field, message, host) {
+  feedback(message, true, host);
+  field.setAttribute("aria-invalid", "true");
+  if (host?.id) {
+    const descriptions = new Set((field.getAttribute("aria-describedby") || "").split(" ").filter(Boolean));
+    descriptions.add(host.id);
+    field.setAttribute("aria-describedby", [...descriptions].join(" "));
+  }
+  field.focus();
+  return false;
+}
+
+function confirmDiscard(form) {
+  return !(form ? isDirty(form) : pendingForms().length) || window.confirm(uiText(
+    "Há alterações não salvas. Deseja descartá-las e continuar?",
+    "You have unsaved changes. Discard them and continue?"));
+}
+
+function closeEditor(dialog, form) {
+  if (!confirmDiscard(form)) return;
+  form.reset();
+  markClean(form);
+  dialog.close();
+}
+
+function navigateWithFeedback(url, message) {
+  try { sessionStorage.setItem("rework-feedback", message); } catch { /* A navegação continua disponível. */ }
+  location.href = url;
+}
+
+function initFormGuidance() {
+  document.querySelectorAll("#newOccurrence, #editOccurrenceForm, #methodForm, #userForm, #scanForm").forEach((form) => {
+    form.dataset.protect = "true";
+    markClean(form);
+  });
+  document.addEventListener("input", (event) => event.target.removeAttribute("aria-invalid"));
+  document.querySelectorAll(".field").forEach((group, index) => {
+    const field = group.querySelector("input, select, textarea");
+    const hint = group.querySelector("small");
+    if (field && hint) {
+      hint.id ||= `fieldHint${index}`;
+      field.setAttribute("aria-describedby", [field.getAttribute("aria-describedby"), hint.id].filter(Boolean).join(" "));
+    }
+  });
+  document.addEventListener("click", (event) => {
+    const link = event.target.closest("a[href]");
+    if (!link || link.hasAttribute("download") || link.target === "_blank" || event.ctrlKey || event.metaKey || event.shiftKey) return;
+    const destination = new URL(link.href, location.href);
+    if (destination.pathname === location.pathname && destination.search === location.search && destination.hash) return;
+    if (!confirmDiscard()) { event.preventDefault(); event.stopPropagation(); }
+    else pendingForms().forEach(markClean);
+  }, true);
+  window.addEventListener("beforeunload", (event) => {
+    if (!pendingForms().length) return;
+    event.preventDefault();
+    event.returnValue = "";
+  });
+  document.querySelectorAll(".table-wrap").forEach((wrap) => {
+    wrap.tabIndex = 0;
+    wrap.setAttribute("role", "region");
+    wrap.setAttribute("aria-label", uiText("Tabela: use as setas para rolar quando necessário", "Table: use arrow keys to scroll when needed"));
+    const hint = document.createElement("p");
+    hint.className = "muted table-scroll-hint no-print";
+    hint.textContent = uiText("Há mais colunas à direita. Deslize a tabela ou use as setas com a tabela em foco.", "More columns are available to the right. Swipe the table or focus it and use arrow keys.");
+    wrap.before(hint);
+    const updateHint = () => { hint.hidden = wrap.scrollWidth <= wrap.clientWidth; };
+    updateHint();
+    window.addEventListener("resize", updateHint);
+  });
+  try {
+    const message = sessionStorage.getItem("rework-feedback");
+    if (message) { feedback(message); sessionStorage.removeItem("rework-feedback"); }
+  } catch { /* O feedback local permanece disponível. */ }
+}
+
+function initContextHelp() {
+  const page = location.pathname.split("/").pop();
+  const topics = {
+    "dashboard.html": "O painel mostra ocorrências pendentes e iniciadas. O progresso representa seriais inspecionados sobre a quantidade bloqueada. Os valores refletem o momento de abertura da página.",
+    "ocorrencias.html": "Busque por ID, modelo, linha ou defeito. Qualidade edita o bloqueio e realiza bipagens; Engenharia define o método; Expedição informa os custos. Use Limpar filtros para voltar a todos os registros.",
+    "nova-ocorrencia.html": "Uma ocorrência registra um bloqueio de produtos para retrabalho. Informe os dados na etapa 1 e distribua a quantidade nos containers na etapa 2. Categoria, departamento e responsável são campos livres. O método pode ser definido depois, antes da bipagem.",
+    "detalhes-ocorrencia.html": "Confira a ocorrência identificada no topo. Use Containers para consultar os volumes e Método para consultar ou definir as instruções. A seção Próxima ação indica como continuar.",
+    "containers.html": "As quantidades representam volumes vinculados a esta ocorrência. A bipagem é registrada para a ocorrência inteira, não individualmente para cada container.",
+    "metodo-retrabalho.html": "Descreva a sequência de inspeção e retrabalho. O anexo é opcional e deve ter até 2 MB. Salvar libera a bipagem para a Qualidade. Remover um anexo é uma ação imediata, com confirmação.",
+    "seriais.html": "Confira o método e a faixa antes de bipar. Enter registra OK; o botão NG registra um defeito. Seriais repetidos não são aceitos. Para corrigir uma leitura, exclua o registro com confirmação e bipe novamente.",
+    "relatorios.html": "O período considera a data da ocorrência. Datas vazias não limitam o período. Gere novamente após mudar filtros; então exporte CSV ou use a impressão do navegador para salvar PDF.",
+    "usuarios.html": "Os cartões descrevem as permissões fixas de cada perfil. Adicionar usuário simula a inclusão na lista desta página; não cria uma conta nem muda o perfil conectado.",
+  };
+  if (!topics[page] || !document.querySelector(".page-top")) return;
+  const help = document.createElement("details");
+  help.className = "context-help no-print";
+  help.lang = "pt-BR";
+  const priorityHelp = ["dashboard.html", "ocorrencias.html", "relatorios.html"].includes(page)
+    ? " A prioridade é automática: com custo por hora informado, o custo acumulado define Alta a partir de R$ 5.000 e Média a partir de R$ 1.000. Sem custo informado, Alta corresponde a pelo menos 1.000 unidades ou 72 horas; Média, a 300 unidades ou 24 horas. Nos demais casos, é Baixa."
+    : "";
+  help.innerHTML = `<summary>Ajuda desta tela</summary><p>${topics[page]}${priorityHelp}</p><p>Pendente, Iniciado e Finalizado são os estados da ocorrência. O estado do método é informado separadamente. Use Tab e Shift+Tab para navegar; Escape fecha janelas de edição, com confirmação quando houver alterações.</p>`;
+  document.querySelector(".page-top").after(help);
+}
 
 // Dados iniciais usados quando ainda não existem ocorrências salvas.
 const seed = [
@@ -131,10 +253,23 @@ const read = () => {
     }
     return normalize(cloneSeed());
   } catch {
+    storageReadFailed = true;
+    feedback("Não foi possível ler os dados salvos. Os exemplos estão sendo exibidos; novas gravações foram suspensas para proteger seus registros. Tente recarregar a página.", true);
     return normalize(cloneSeed());
   }
 };
-const save = (data) => localStorage.setItem(STORE, JSON.stringify(data));
+const save = (data, target) => {
+  try {
+    if (storageReadFailed) throw new Error("Leitura indisponível");
+    localStorage.setItem(STORE, JSON.stringify(data));
+    return true;
+  } catch {
+    feedback(storageReadFailed
+      ? "Não foi possível salvar porque os dados anteriores não puderam ser lidos. Recarregue a página e tente novamente."
+      : "Não foi possível salvar neste navegador. Seus campos foram mantidos. Verifique o espaço disponível e, se houver anexo, tente um arquivo menor.", true, target);
+    return false;
+  }
+};
 // Funções auxiliares compartilhadas por todas as telas.
 const selected = () =>
   new URLSearchParams(location.search).get("id") ||
@@ -377,9 +512,15 @@ function initPreferences() {
   language.value = localStorage.getItem("rework-language") || "system";
   theme.onchange = () => {
     localStorage.setItem("rework-theme", theme.value);
-    location.reload();
+    document.documentElement.dataset.theme = theme.value === "dark" ||
+      (theme.value === "system" && matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light";
   };
   language.onchange = () => {
+    if (!confirmDiscard()) {
+      language.value = localStorage.getItem("rework-language") || "system";
+      return;
+    }
+    pendingForms().forEach(markClean);
     localStorage.setItem("rework-language", language.value);
     location.reload();
   };
@@ -412,6 +553,7 @@ function initLogin() {
       const show = password.type === "password";
       password.type = show ? "text" : "password";
       event.currentTarget.textContent = show ? "Ocultar" : "Mostrar";
+      event.currentTarget.setAttribute("aria-pressed", String(show));
     });
   document.querySelector("#publicDashboard")?.addEventListener("click", () => {
     sessionStorage.setItem("rework-profile", "Produção");
@@ -421,6 +563,7 @@ function initLogin() {
     if (!form.reportValidity()) return;
     const profile = form.elements.profile.value;
     sessionStorage.setItem("rework-profile", profile);
+    status.textContent = "Acesso demonstrativo selecionado. Abrindo o painel…";
     location.href = "dashboard.html";
   });
   return true;
@@ -466,12 +609,30 @@ function bindGlobal() {
   });
   document.querySelectorAll("[data-logout]").forEach((button) => {
     button.onclick = () => {
+      if (!confirmDiscard()) return;
+      pendingForms().forEach(markClean);
       sessionStorage.removeItem("rework-profile");
       location.href = "index.html";
     };
   });
+  const updateSidebarState = () => {
+    const toggle = document.querySelector("#toggleSidebar");
+    if (!toggle) return;
+    const collapsed = document.body.classList.contains("sidebar-collapsed");
+    const label = collapsed ? uiText("Expandir menu", "Expand menu") : uiText("Recolher menu", "Collapse menu");
+    toggle.setAttribute("aria-expanded", String(!collapsed));
+    toggle.setAttribute("aria-label", label);
+    toggle.title = label;
+  };
+  document.querySelectorAll(".sidebar nav").forEach((nav, index) => nav.setAttribute("aria-label", index ? "Gestão" : "Operação"));
+  document.querySelectorAll(".sidebar nav a").forEach((link) => {
+    link.setAttribute("aria-label", link.title);
+    if (link.classList.contains("active")) link.setAttribute("aria-current", "page");
+  });
+  updateSidebarState();
   document.querySelector("#toggleSidebar")?.addEventListener("click", () => {
     document.body.classList.toggle("sidebar-collapsed");
+    updateSidebarState();
     localStorage.setItem(
       "rework-sidebar",
       document.body.classList.contains("sidebar-collapsed")
@@ -509,7 +670,7 @@ function occurrenceActions(occurrence, profile) {
   const actions = occurrence.method
     ? `<a href="seriais.html${params(occurrence.id)}" data-select="${occurrence.id}">Bipar</a><a href="metodo-retrabalho.html${params(occurrence.id)}" data-select="${occurrence.id}">Arquivo</a>`
     : `<a href="metodo-retrabalho.html${params(occurrence.id)}" data-select="${occurrence.id}">Definir método</a>`;
-  return actions + (profile === "Qualidade"
+  return (profile === "Qualidade" ? `<a href="detalhes-ocorrencia.html${params(occurrence.id)}">Ver detalhes</a>` : "") + actions + (profile === "Qualidade"
     ? `<button class="danger compact-action" type="button" data-delete-occurrence="${esc(occurrence.id)}" aria-label="${en ? "Delete occurrence" : "Excluir ocorrência"} ${esc(occurrence.id)}">${en ? "Delete" : "Excluir"}</button>`
     : "");
 }
@@ -525,7 +686,7 @@ function deleteOccurrence(id) {
     : `Excluir a ocorrência ${id} (${occurrence.defect})? Seus containers, bipagens e anexo do método também serão excluídos. Esta ação não pode ser desfeita.`)) return false;
   if (sessionStorage.getItem("rework-profile") !== "Qualidade") return false;
   try {
-    save(read().filter((item) => item.id !== id));
+    if (!save(read().filter((item) => item.id !== id))) return false;
   } catch {
     window.alert(en ? "Unable to delete the occurrence. Please try again." : "Não foi possível excluir a ocorrência. Tente novamente.");
     return false;
@@ -545,7 +706,7 @@ function occurrenceRows(list) {
       <td>${
         profile === "Qualidade" || profile === "Expedição"
           ? `<button class="folder-button" type="button" data-edit="${occurrence.id}" aria-label="Editar ${occurrence.id}" title="Editar ${occurrence.id}">
-        <span aria-hidden="true">📁</span><small>${occurrence.id}</small>
+        <span aria-hidden="true">✎</span><small>${occurrence.id}</small><small>${profile === "Expedição" ? "Editar custos" : "Editar"}</small>
       </button>`
           : `<span class="folder-reference">📁 <small>${occurrence.id}</small></span>`
       }</td>
@@ -584,6 +745,8 @@ function initOccurrences() {
     const occurrence = data.find((item) => item.id === id);
     if (!occurrence) return;
     editingId = id;
+    document.querySelector("#editFormStatus").textContent = "";
+    form.querySelectorAll("[aria-invalid]").forEach((field) => field.removeAttribute("aria-invalid"));
     document.querySelector("#editOccurrenceTitle").textContent = id;
     ["model", "line", "defect", "description", "person", "status"].forEach(
       (key) => {
@@ -603,6 +766,7 @@ function initOccurrences() {
     form.querySelectorAll("input, select, textarea").forEach((field) => {
       field.disabled = profile === "Expedição" && !field.closest(".cost-field");
     });
+    markClean(form);
     dialog.showModal();
   };
   const render = () => {
@@ -638,6 +802,8 @@ function initOccurrences() {
         if (!deleteOccurrence(button.dataset.deleteOccurrence)) return;
         data = read();
         render();
+        feedback(`Ocorrência ${button.dataset.deleteOccurrence} excluída.`);
+        search.focus();
       };
     });
     body
@@ -655,11 +821,13 @@ function initOccurrences() {
   };
   document
     .querySelectorAll("[data-close-dialog]")
-    .forEach((button) => (button.onclick = () => dialog.close()));
+    .forEach((button) => (button.onclick = () => closeEditor(dialog, form)));
+  dialog.addEventListener("cancel", (event) => { event.preventDefault(); closeEditor(dialog, form); });
   form.onsubmit = (event) => {
     event.preventDefault();
     if (!form.reportValidity()) return;
-    const occurrence = data.find((item) => item.id === editingId);
+    const original = data.find((item) => item.id === editingId);
+    const occurrence = JSON.parse(JSON.stringify(original));
     const values = new FormData(form);
     const serialStart = values.get("serialStart")?.trim();
     const serialEnd = values.get("serialEnd")?.trim();
@@ -671,9 +839,16 @@ function initOccurrences() {
         sensitivity: "base",
       }) > 0
     ) {
-      editStatus.textContent =
-        "O serial final deve ser igual ou posterior ao serial inicial.";
+      fieldError(form.elements.serialEnd, "O serial final deve ser igual ou posterior ao serial inicial. Revise a faixa antes de salvar.", editStatus);
       return;
+    }
+    if (profile === "Qualidade") {
+      const changes = [];
+      if (values.get("status") !== original.status) changes.push(`Status: ${original.status} → ${values.get("status")}`);
+      if (Number(values.get("blocked")) !== original.blocked) changes.push(`Quantidade bloqueada: ${original.blocked} → ${values.get("blocked")}. Containers e bipagens existentes não serão alterados.`);
+      if (serialStart !== original.serialStart || serialEnd !== original.serialEnd) changes.push(`Nova faixa: ${serialStart} a ${serialEnd}. As bipagens existentes serão mantidas.`);
+      if (values.get("date") !== toIsoDate(original.date)) changes.push("A data do bloqueio será alterada e afetará o cálculo do custo acumulado.");
+      if (changes.length && !window.confirm(`Confirme as alterações em ${editingId}:\n\n${changes.join("\n")}\n\nSalvar alterações?`)) return;
     }
     editStatus.textContent = "";
     if (profile === "Qualidade") {
@@ -696,9 +871,15 @@ function initOccurrences() {
     occurrence.salesDelayHourlyCost = Number(
       values.get("salesDelayHourlyCost") || 0,
     );
-    save(data);
+    const updated = data.map((item) => item.id === editingId ? occurrence : item);
+    if (!save(updated, editStatus)) return;
+    data = updated;
+    markClean(form);
     dialog.close();
     render();
+    feedback(`Ocorrência ${editingId} atualizada. As alterações já estão disponíveis na lista.`);
+    const trigger = [...body.querySelectorAll("[data-edit]")].find((button) => button.dataset.edit === editingId);
+    (trigger || search).focus();
   };
   render();
 }
@@ -730,7 +911,7 @@ function initDashboard() {
         const percent = item.blocked
           ? Math.min(Math.round((inspected(item) / item.blocked) * 100), 100)
           : 0;
-        return `<tr><td><strong>${esc(item.line)}</strong></td><td>${esc(item.model)}</td><td>${item.date}</td><td class="wrap">${esc(item.defect)}</td><td>${num(item.blocked)}</td><td>${num(pending(item))}</td><td>${num(defects(item))}</td><td>${statusBadge(item)}</td><td>${costPriorityCell(item)}</td><td><div class="progress-cell"><progress max="100" value="${percent}">${percent}%</progress><span>${percent}%</span></div></td></tr>`;
+        return `<tr><td><strong>${esc(item.line)}</strong></td><td>${esc(item.model)}</td><td>${item.date}</td><td class="wrap">${esc(item.defect)}</td><td>${num(item.blocked)}</td><td>${num(pending(item))}</td><td>${num(defects(item))}</td><td>${statusBadge(item)}</td><td>${costPriorityCell(item)}</td><td><div class="progress-cell"><progress aria-label="Progresso de ${esc(item.id)}" max="100" value="${percent}">${percent}%</progress><span>${percent}%</span></div></td></tr>`;
       })
       .join("") ||
     `<tr><td colspan="10" class="empty">Nenhuma ocorrência aberta ou pendente.</td></tr>`;
@@ -739,7 +920,13 @@ function initDashboard() {
 }
 
 function getCurrent() {
-  return read().find((item) => item.id === selected()) || read()[0];
+  return read().find((item) => item.id === selected());
+}
+
+function showMissingOccurrence() {
+  const main = document.querySelector("main");
+  main.innerHTML = `<section class="panel"><h1 tabindex="-1">Ocorrência não encontrada</h1><p>O registro solicitado não está disponível. Ele pode ter sido excluído ou o endereço pode estar incorreto.</p><a class="primary" href="ocorrencias.html">Voltar às ocorrências</a></section>`;
+  main.querySelector("h1").focus();
 }
 function setLinks(occurrence) {
   document
@@ -755,7 +942,7 @@ function initMethod() {
   if (!form) return;
   const occurrence = getCurrent();
   if (!occurrence) {
-    location.replace("ocorrencias.html");
+    showMissingOccurrence();
     return;
   }
   choose(occurrence.id);
@@ -765,6 +952,11 @@ function initMethod() {
     `<strong>${esc(occurrence.defect)}</strong><br>${esc(occurrence.model)} · ${esc(occurrence.line)}<br>${num(occurrence.blocked)} unidades`;
   const fileInput = document.querySelector("#methodFile");
   const attachment = document.querySelector("#methodAttachment");
+  const status = document.querySelector("#methodFileStatus");
+  const submit = form.querySelector('[type="submit"]');
+  const engineering = sessionStorage.getItem("rework-profile") === "Engenharia";
+  submit.textContent = engineering ? "Salvar método" : "Salvar e iniciar bipagem";
+  let saving = false;
   const renderAttachment = () => {
     attachment.innerHTML = occurrence.methodFile
       ? `<div class="attachment-row"><div><strong>${esc(occurrence.methodFile.name)}</strong><small>${esc(occurrence.methodFile.type || "Arquivo do método")}</small></div><div class="table-actions"><a class="secondary" href="${occurrence.methodFile.data}" download="${esc(occurrence.methodFile.name)}">Baixar</a><button id="removeMethodFile" class="danger" type="button">Remover</button></div></div>`
@@ -772,11 +964,16 @@ function initMethod() {
     document
       .querySelector("#removeMethodFile")
       ?.addEventListener("click", () => {
-        occurrence.methodFile = null;
+        if (!window.confirm(`Remover o anexo ${occurrence.methodFile.name} de ${occurrence.id}? A remoção é imediata e não será desfeita pelo botão Cancelar.`)) return;
         const data = read();
-        data[data.findIndex((item) => item.id === occurrence.id)] = occurrence;
-        save(data);
+        const target = data.find((item) => item.id === occurrence.id);
+        if (!target) { feedback("Esta ocorrência não está mais disponível. Volte à lista.", true, status); return; }
+        target.methodFile = null;
+        if (!save(data, status)) return;
+        occurrence.methodFile = null;
         renderAttachment();
+        feedback("Anexo removido. Você pode escolher outro arquivo e salvar o método.", false, status);
+        fileInput.focus();
       });
   };
   renderAttachment();
@@ -785,9 +982,11 @@ function initMethod() {
   );
   form.onsubmit = async (event) => {
     event.preventDefault();
+    if (saving) return;
     if (!form.reportValidity()) return;
     const data = read();
     const target = data.find((item) => item.id === occurrence.id);
+    if (!target) { feedback("Esta ocorrência não está mais disponível. Volte à lista.", true, status); return; }
     const values = new FormData(form);
     ["cause", "method", "classification", "department", "person"].forEach(
       (key) => (target[key] = values.get(key).trim()),
@@ -795,19 +994,33 @@ function initMethod() {
     const file = fileInput.files[0];
     if (file) {
       if (file.size > 2 * 1024 * 1024) {
-        document.querySelector("#methodFileStatus").textContent =
-          "O arquivo deve ter no máximo 2 MB neste protótipo.";
+        fieldError(fileInput, "O arquivo ultrapassa 2 MB. Escolha um arquivo menor; os demais campos foram mantidos.", status);
         return;
       }
-      target.methodFile = {
-        name: file.name,
-        type: file.type,
-        data: await fileToDataUrl(file),
-      };
     }
-    if (target.status === "Pendente") target.status = "Iniciado";
-    save(data);
-    location.href = `seriais.html${params(target.id)}`;
+    saving = true;
+    const savedSignature = formSignature(form);
+    submit.disabled = true;
+    form.setAttribute("aria-busy", "true");
+    feedback("Salvando método e preparando o anexo…", false, status);
+    try {
+      if (file) target.methodFile = { name: file.name, type: file.type, data: await fileToDataUrl(file) };
+      if (target.status === "Pendente") target.status = "Iniciado";
+      if (!save(data, status)) return;
+      formSnapshots.set(form, savedSignature);
+      if (isDirty(form)) {
+        feedback("Método salvo. Há novas alterações feitas durante o envio; revise e salve novamente antes de sair.", false, status);
+        return;
+      }
+      navigateWithFeedback(engineering ? "ocorrencias.html" : `seriais.html${params(target.id)}`,
+        `Método de ${target.id} salvo. ${engineering ? "A Qualidade já pode realizar a bipagem." : "Bipe ou digite o próximo serial para iniciar a inspeção."}`);
+    } catch {
+      feedback("Não foi possível ler o anexo. Escolha o arquivo novamente e tente salvar. Seus campos foram mantidos.", true, status);
+    } finally {
+      saving = false;
+      submit.disabled = false;
+      form.removeAttribute("aria-busy");
+    }
   };
 }
 
@@ -826,7 +1039,7 @@ function initScans() {
   if (!form) return;
   const occurrence = getCurrent();
   if (!occurrence) {
-    location.replace("ocorrencias.html");
+    showMissingOccurrence();
     return;
   }
   choose(occurrence.id);
@@ -842,7 +1055,7 @@ function initScans() {
       occurrence.scans
         .map(
           (scan) =>
-            `<tr><td>${esc(scan.serial)}</td><td><span class="badge ${scan.result.toLowerCase()}">${scan.result}</span></td><td>${scan.at}</td><td>Qualidade</td><td><button class="danger compact-action" type="button" data-delete-scan="${esc(scan.serial)}">Excluir</button></td></tr>`,
+            `<tr><td>${esc(scan.serial)}</td><td><span class="badge ${scan.result.toLowerCase()}">${scan.result}</span></td><td>${scan.at}</td><td>Qualidade</td><td><button class="danger compact-action" type="button" data-delete-scan="${esc(scan.serial)}" aria-label="Excluir serial ${esc(scan.serial)}">Excluir</button></td></tr>`,
         )
         .join("") ||
       `<tr><td colspan="5" class="empty">Nenhum serial bipado neste bloqueio.</td></tr>`;
@@ -852,13 +1065,17 @@ function initScans() {
           (scan) => scan.serial === button.dataset.deleteScan,
         );
         if (index < 0) return;
-        occurrence.scans.splice(index, 1);
+        if (!window.confirm(`Excluir o serial ${button.dataset.deleteScan} de ${occurrence.id}? Ele deixará de contar como inspecionado. Você poderá bipá-lo novamente.`)) return;
+        const removed = occurrence.scans.splice(index, 1)[0];
         const data = read();
-        data[data.findIndex((item) => item.id === occurrence.id)] = occurrence;
-        save(data);
+        const targetIndex = data.findIndex((item) => item.id === occurrence.id);
+        if (targetIndex < 0) { occurrence.scans.splice(index, 0, removed); feedback("Ocorrência não encontrada. Volte à lista.", true, status); return; }
+        data[targetIndex] = occurrence;
+        if (!save(data, status)) { occurrence.scans.splice(index, 0, removed); return; }
         status.className = "status-message success";
         status.textContent = `Serial ${button.dataset.deleteScan} excluído.`;
         render();
+        input.focus();
       };
     });
     document.querySelector("#scanCount").textContent = inspected(occurrence);
@@ -867,6 +1084,7 @@ function initScans() {
     );
   };
   const register = (result) => {
+    if (!occurrence.method) return;
     const serial = input.value.trim();
     const inRange =
       serial.localeCompare(occurrence.serialStart, undefined, {
@@ -876,8 +1094,7 @@ function initScans() {
         numeric: true,
       }) <= 0;
     if (!serial || !inRange) {
-      status.className = "status-message error";
-      status.textContent = "Serial fora da faixa deste bloqueio.";
+      fieldError(input, !serial ? "Bipe ou digite um número de série antes de registrar." : `Serial fora da faixa de ${occurrence.id}. Informe um serial entre ${occurrence.serialStart} e ${occurrence.serialEnd}.`, status);
       return;
     }
     if (
@@ -885,8 +1102,8 @@ function initScans() {
         (scan) => scan.serial.toLowerCase() === serial.toLowerCase(),
       )
     ) {
-      status.className = "status-message error";
-      status.textContent = "Este serial já foi bipado.";
+      const previous = occurrence.scans.find((scan) => scan.serial.toLowerCase() === serial.toLowerCase());
+      fieldError(input, `O serial ${serial} já foi registrado como ${previous.result}. Consulte a leitura abaixo; para corrigir, exclua-a antes de registrar novamente.`, status);
       return;
     }
     occurrence.scans.unshift({
@@ -895,12 +1112,17 @@ function initScans() {
       at: new Date().toLocaleString("pt-BR"),
     });
     const data = read();
-    data[data.findIndex((item) => item.id === occurrence.id)] = occurrence;
-    save(data);
+    const targetIndex = data.findIndex((item) => item.id === occurrence.id);
+    if (targetIndex < 0) { occurrence.scans.shift(); feedback("Ocorrência não encontrada. Volte à lista.", true, status); return; }
+    data[targetIndex] = occurrence;
+    if (!save(data, status)) { occurrence.scans.shift(); return; }
     status.className = "status-message success";
-    status.textContent = `${serial} registrado como ${result}.`;
+    status.textContent = `${serial} registrado como ${result}. ${pending(occurrence) ? "Bipe ou digite o próximo serial." : "Não há unidades pendentes. Revise as leituras e o status da ocorrência."}`;
     input.value = "";
+    input.removeAttribute("aria-invalid");
+    markClean(form);
     render();
+    input.focus();
   };
   document.querySelector("#okScan").onclick = () => register("OK");
   document.querySelector("#ngScan").onclick = () => register("NG");
@@ -923,13 +1145,13 @@ function initContainers() {
   if (!host) return;
   const occurrence = getCurrent();
   if (!occurrence) {
-    location.replace("ocorrencias.html");
+    showMissingOccurrence();
     return;
   }
   choose(occurrence.id);
   setLinks(occurrence);
   document.querySelector("#containerId").textContent = occurrence.id;
-  host.innerHTML = `<article class="panel span-4"><h2>Resumo</h2><p>Bloqueado: <strong>${num(occurrence.blocked)}</strong><br>Em containers: <strong>${num(occurrence.containers.reduce((total, item) => total + item.qty, 0))}</strong></p></article><article class="panel span-8"><h2>Containers deste bloqueio</h2><div class="table-wrap"><table><thead><tr><th>Container</th><th>Quantidade</th><th>Ação</th></tr></thead><tbody>${occurrence.containers.map((container) => `<tr><td>${esc(container.id)}</td><td>${num(container.qty)}</td><td><a href="seriais.html${params(occurrence.id)}">Abrir bipagem</a></td></tr>`).join("")}</tbody></table></div></article>`;
+  host.innerHTML = `<article class="panel span-4"><h2>Resumo</h2><p>Bloqueado: <strong>${num(occurrence.blocked)}</strong><br>Em containers: <strong>${num(occurrence.containers.reduce((total, item) => total + item.qty, 0))}</strong></p></article><article class="panel span-8"><h2>Containers deste bloqueio</h2><div class="table-wrap"><table><thead><tr><th>Container</th><th>Quantidade</th><th>Ação</th></tr></thead><tbody>${occurrence.containers.map((container) => `<tr><td>${esc(container.id)}</td><td>${num(container.qty)}</td><td><a href="seriais.html${params(occurrence.id)}">Bipar seriais da ocorrência</a></td></tr>`).join("")}</tbody></table></div></article>`;
 }
 
 // Exibe o resumo e a próxima ação da ocorrência.
@@ -938,7 +1160,7 @@ function initDetail() {
   if (!host) return;
   const occurrence = getCurrent();
   if (!occurrence) {
-    location.replace("ocorrencias.html");
+    showMissingOccurrence();
     return;
   }
   choose(occurrence.id);
@@ -956,10 +1178,11 @@ function initUsers() {
   if (!dialog) return;
   const form = document.querySelector("#userForm");
   const rows = document.querySelector("#userRows");
-  document.querySelector("#addUser").onclick = () => dialog.showModal();
+  document.querySelector("#addUser").onclick = () => { markClean(form); dialog.showModal(); };
   document
     .querySelectorAll("[data-close-user]")
-    .forEach((button) => (button.onclick = () => dialog.close()));
+    .forEach((button) => (button.onclick = () => closeEditor(dialog, form)));
+  dialog.addEventListener("cancel", (event) => { event.preventDefault(); closeEditor(dialog, form); });
   form.onsubmit = (event) => {
     event.preventDefault();
     if (!form.reportValidity()) return;
@@ -968,7 +1191,9 @@ function initUsers() {
     row.innerHTML = `<td>${esc(values.get("name"))}</td><td>${esc(values.get("area"))}</td><td>${esc(values.get("profile"))}</td><td><span class="badge defined">Ativo</span></td>`;
     rows.appendChild(row);
     form.reset();
+    markClean(form);
     dialog.close();
+    feedback(`Usuário ${values.get("name")} adicionado à demonstração desta página. Este cadastro não cria credenciais e será removido ao recarregar.`);
   };
 }
 
@@ -982,12 +1207,31 @@ function initReports() {
   const status = document.querySelector("#reportStatus");
   const line = document.querySelector("#reportLine");
   let reportData = [];
+  let appliedFilters = "";
+  const filterSignature = () => JSON.stringify([start.value, end.value, status.value, line.value]);
+  const reportFeedback = document.querySelector("#reportFeedback");
+  const validatePeriod = () => {
+    if (start.value && end.value && start.value > end.value)
+      return fieldError(end, "A data final deve ser igual ou posterior à data inicial. Ajuste o período e gere novamente.", reportFeedback);
+    end.removeAttribute("aria-invalid");
+    return true;
+  };
+  const requireAppliedFilters = () => {
+    if (!validatePeriod()) return false;
+    if (filterSignature() !== appliedFilters) {
+      feedback("Os filtros foram alterados. Clique em Gerar relatório antes de exportar ou imprimir.", true, reportFeedback);
+      document.querySelector("#generateReport").focus();
+      return false;
+    }
+    return true;
+  };
 
   [...new Set(data.map((item) => item.line))]
     .sort()
     .forEach((itemLine) => line.add(new Option(itemLine, itemLine)));
 
   const render = () => {
+    if (!validatePeriod()) return;
     reportData = data.filter((item) => {
       const itemDate = toIsoDate(item.date);
       return (
@@ -1029,15 +1273,21 @@ function initReports() {
     const periodStart = start.value
       ? fromIsoDate(start.value)
       : "início dos registros";
-    const periodEnd = end.value ? fromIsoDate(end.value) : "hoje";
+    const periodEnd = end.value ? fromIsoDate(end.value) : "fim dos registros";
     document.querySelector("#reportPeriod").textContent =
-      `Período: ${periodStart} até ${periodEnd}`;
+      `Período: ${periodStart} até ${periodEnd} · Status: ${status.value} · Linha: ${line.value || "Todas"}`;
     document.querySelector("#reportGeneratedAt").textContent =
       `Gerado em ${new Date().toLocaleString("pt-BR")}`;
     document.querySelector("#reportCount").textContent =
       `${reportData.length} registro(s)`;
+    appliedFilters = filterSignature();
+    feedback(`Relatório gerado: ${reportData.length} ocorrência(s). ${reportData.length ? "Você pode exportar CSV ou imprimir este resultado." : "Revise os filtros ou use Limpar para consultar todos os registros."}`, false, reportFeedback);
     translatePage();
   };
+
+  [start, end, status, line].forEach((field) => field.addEventListener("input", () => {
+    feedback(filterSignature() === appliedFilters ? "Os filtros correspondem ao relatório exibido." : "Filtros alterados. O resultado abaixo ainda é o anterior; clique em Gerar relatório para atualizar.", false, reportFeedback);
+  }));
 
   document.querySelector("#generateReport").onclick = render;
   document.querySelector("#clearReport").onclick = () => {
@@ -1047,8 +1297,9 @@ function initReports() {
     line.value = "";
     render();
   };
-  document.querySelector("#printReport").onclick = () => window.print();
+  document.querySelector("#printReport").onclick = () => { if (requireAppliedFilters()) window.print(); };
   document.querySelector("#exportReport").onclick = () => {
+    if (!requireAppliedFilters()) return;
     const csvCell = (value) => {
       let safeValue = String(value ?? "");
       if (/^[=+\-@]/.test(safeValue)) safeValue = `'${safeValue}`;
@@ -1089,6 +1340,7 @@ function initReports() {
     link.download = `relatorio-ocorrencias-${new Date().toISOString().slice(0, 10)}.csv`;
     link.click();
     URL.revokeObjectURL(url);
+    feedback("CSV preparado. Verifique os downloads do navegador.", false, reportFeedback);
   };
   render();
 }
@@ -1102,36 +1354,68 @@ function initNew() {
   const stepMark1 = document.querySelector("#stepMark1");
   const stepMark2 = document.querySelector("#stepMark2");
   const rows = document.querySelector("#containerRows");
-  const addRow = () => {
+  const firstStatus = document.querySelector("#step1Status");
+  const totals = document.querySelector("#containerTotals");
+  let rowSequence = 0;
+  const updateTotals = () => {
+    const total = [...rows.querySelectorAll('[name="containerQty"]')].reduce((sum, field) => sum + Number(field.value || 0), 0);
+    const blocked = Number(form.elements.blocked.value || 0);
+    totals.textContent = `Quantidade bloqueada: ${num(blocked)} · Nos containers: ${num(total)} · ${total > blocked ? "Excesso" : "Falta distribuir"}: ${num(Math.abs(blocked - total))}`;
+  };
+  const showStep = (second) => {
+    step1.hidden = second;
+    step2.hidden = !second;
+    stepMark1.classList.toggle("active", !second);
+    stepMark2.classList.toggle("active", second);
+    stepMark1.toggleAttribute("aria-current", !second);
+    stepMark2.toggleAttribute("aria-current", second);
+    (second ? stepMark2 : stepMark1).setAttribute("aria-current", "step");
+    document.querySelector(second ? "#step2Title" : "#step1Title").focus();
+    updateTotals();
+  };
+  const validateFirstStep = () => {
+    const invalid = [...step1.querySelectorAll("input, textarea")].find((field) => !field.checkValidity());
+    if (invalid) { showStep(false); invalid.reportValidity(); return false; }
+    if (form.elements.serialStart.value.trim().localeCompare(form.elements.serialEnd.value.trim(), undefined, {numeric: true, sensitivity: "base"}) > 0) {
+      showStep(false);
+      return fieldError(form.elements.serialEnd, "O serial final deve ser igual ou posterior ao serial inicial. Revise a faixa para continuar.", firstStatus);
+    }
+    if (Number(form.elements.detected.value) > Number(form.elements.blocked.value)) {
+      showStep(false);
+      return fieldError(form.elements.detected, "A quantidade detectada não pode superar a quantidade bloqueada. Revise essas duas quantidades.", firstStatus);
+    }
+    firstStatus.textContent = "";
+    return true;
+  };
+  const addRow = (focus = false) => {
+    const rowId = ++rowSequence;
     const row = document.createElement("div");
     row.className = "container-row";
-    row.innerHTML = `<div class="field"><label>Container *</label><input name="containerId" required></div><div class="field"><label>Quantidade *</label><input name="containerQty" type="number" min="1" required></div><button type="button" class="danger">Remover</button>`;
-    row.querySelector("button").onclick = () => row.remove();
+    row.innerHTML = `<div class="field"><label for="containerId${rowId}">Container ${rowId} *</label><input id="containerId${rowId}" name="containerId" required></div><div class="field"><label for="containerQty${rowId}">Quantidade *</label><input id="containerQty${rowId}" name="containerQty" type="number" min="1" required></div><button type="button" class="danger" aria-label="Remover container ${rowId}">Remover</button>`;
+    row.querySelector("button").onclick = () => {
+      const filled = [...row.querySelectorAll("input")].some((field) => field.value);
+      if (filled && !window.confirm(`Remover o container ${row.querySelector("input").value || rowId} deste cadastro? A quantidade precisará ser redistribuída.`)) return;
+      row.remove();
+      updateTotals();
+      document.querySelector("#addContainer").focus();
+    };
     rows.appendChild(row);
+    updateTotals();
+    if (focus) row.querySelector("input").focus();
   };
   addRow();
-  document.querySelector("#addContainer").onclick = addRow;
+  rows.addEventListener("input", updateTotals);
+  document.querySelector("#addContainer").onclick = () => addRow(true);
   document.querySelector("#nextStep").onclick = () => {
-    if (
-      [...step1.querySelectorAll("[required]")].some(
-        (input) => !input.reportValidity(),
-      )
-    )
-      return;
-    step1.hidden = true;
-    step2.hidden = false;
-    stepMark1.classList.remove("active");
-    stepMark2.classList.add("active");
-    document.querySelector("#step2Title").focus();
+    if (validateFirstStep()) showStep(true);
   };
   document.querySelector("#backStep").onclick = () => {
-    step2.hidden = true;
-    step1.hidden = false;
-    stepMark2.classList.remove("active");
-    stepMark1.classList.add("active");
+    showStep(false);
   };
   form.onsubmit = (event) => {
     event.preventDefault();
+    if (!validateFirstStep()) return;
+    if (step2.hidden) { showStep(true); return; }
     if (!form.reportValidity()) return;
     const values = new FormData(form);
     const data = read();
@@ -1194,12 +1478,14 @@ function initNew() {
     ) {
       newStatus.textContent =
         "A soma dos containers deve ser igual à quantidade bloqueada.";
+      (rows.querySelector('[name="containerQty"]') || document.querySelector("#addContainer")).focus();
       return;
     }
     data.unshift(occurrence);
-    save(data);
+    if (!save(data, newStatus)) return;
     choose(id);
-    location.href = `detalhes-ocorrencia.html${params(id)}`;
+    markClean(form);
+    navigateWithFeedback(`detalhes-ocorrencia.html${params(id)}`, `Ocorrência ${id} criada. ${occurrence.method ? "Método informado: a bipagem já está disponível." : "Próximo passo: definir o método de retrabalho para liberar a bipagem."}`);
   };
 }
 
@@ -1246,5 +1532,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initContainers();
   initUsers();
   initReports();
+  initContextHelp();
+  initFormGuidance();
   translatePage();
 });

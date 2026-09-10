@@ -14,7 +14,8 @@
         <div>
           <p class="kicker">Acesso e responsabilidade</p>
           <h1>Usuários e perfis</h1>
-          <p>Cadastre pessoas e defina o que cada classe pode acessar.</p>
+          <p>Explore os perfis de acesso e simule o cadastro de pessoas.</p>
+          <p class="notice">Os usuários adicionados aparecem somente nesta página até recarregá-la. O cadastro demonstrativo não cria credenciais nem altera as permissões dos perfis.</p>
         </div>
         <button id="addUser" class="primary" type="button">
           Adicionar usuário
@@ -100,12 +101,12 @@
           </div>
         </article>
       </section>
-      <dialog id="userDialog" class="edit-dialog">
+      <dialog id="userDialog" class="edit-dialog" aria-labelledby="userDialogTitle">
         <form id="userForm">
           <header class="dialog-header">
             <div>
               <p class="kicker">Novo acesso</p>
-              <h2>Adicionar usuário</h2>
+              <h2 id="userDialogTitle">Adicionar usuário demonstrativo</h2>
             </div>
             <button
               class="icon-button"
