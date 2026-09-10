@@ -35,13 +35,14 @@
             <label for="serialScan">Número de série</label
             ><input
               id="serialScan"
+              name="serial"
+              aria-describedby="scanRange scanHelp scanStatus"
               class="scan-input"
               autocomplete="off"
               autofocus
               placeholder="Bipe ou digite o serial"
-            /><small
-              >Enter registra como OK. Use os botões para escolher o
-              resultado.</small
+            /><small id="scanHelp"
+              >OK = aprovado na inspeção; NG = defeito encontrado. Enter registra como OK, inclusive quando enviado pelo leitor. Para NG, use Registrar NG. Confira a faixa e o resultado antes de registrar.</small
             >
           </div>
           <div class="result-buttons scan-box">

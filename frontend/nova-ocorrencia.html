@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Rework | Criar retrabalho</title>
+    <title>Rework | Criar ocorrência</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body class="app-body">
@@ -13,19 +13,20 @@
       <header class="page-top">
         <div>
           <p class="kicker">Novo bloqueio</p>
-          <h1>Criar retrabalho</h1>
+          <h1>Criar ocorrência</h1>
           <p>Preencha em duas etapas curtas. Campos com * são obrigatórios.</p>
         </div>
       </header>
       <div class="stepper" aria-label="Etapas">
-        <span id="stepMark1" class="step active"><b>1</b>Bloqueio</span
+        <span id="stepMark1" class="step active" aria-current="step"><b>1</b>Bloqueio</span
         ><i class="step-line"></i
         ><span id="stepMark2" class="step"><b>2</b>Fluxo e containers</span>
       </div>
       <!-- Cadastro dividido entre dados do bloqueio e fluxo de execução. -->
       <form id="newOccurrence" novalidate>
         <section id="step1" class="panel">
-          <h2>Dados do bloqueio</h2>
+          <h2 id="step1Title" tabindex="-1">Dados do bloqueio</h2>
+          <p>Informe o produto, o defeito e a faixa de seriais. Na próxima etapa, distribua a quantidade bloqueada entre os containers.</p>
           <div class="form-grid three">
             <div class="field">
               <label for="line">Linha *</label
@@ -93,6 +94,7 @@
               />
             </div>
           </div>
+          <div id="step1Status" class="status-message error" role="alert"></div>
           <div class="actions">
             <a class="secondary" href="ocorrencias.html">Cancelar</a
             ><button id="nextStep" class="primary" type="button">
@@ -109,7 +111,7 @@
             </div>
             <div class="field">
               <label for="method">Método de retrabalho</label>
-              <input id="method" name="method" />
+              <textarea id="method" name="method" rows="3"></textarea>
               <small>Pode ser definido mais tarde pela ação da tabela.</small>
             </div>
             <div class="field">
@@ -163,6 +165,7 @@
           </div>
           <h3 class="section-spacing">Containers e quantidades</h3>
           <p class="muted">A soma deve ser igual à quantidade bloqueada.</p>
+          <p id="containerTotals" class="notice" role="status" aria-live="polite"></p>
           <div id="containerRows"></div>
           <button
             id="addContainer"
@@ -179,7 +182,7 @@
           ></div>
           <div class="actions">
             <button id="backStep" class="secondary" type="button">Voltar</button
-            ><button class="primary" type="submit">Criar bloqueio</button>
+            ><button class="primary" type="submit">Criar ocorrência</button>
           </div>
         </section>
       </form>

@@ -1372,6 +1372,67 @@ progress::-moz-progress-bar {
   margin-top: 14px;
 }
 
+/* Feedback e orientação: visibilidade, leitura e operação em telas pequenas. */
+.feedback-box:not(:empty) {
+  padding: 12px 14px;
+  border: 1px solid currentColor;
+  border-radius: 8px;
+  margin-bottom: 15px;
+}
+.context-help {
+  margin-bottom: 18px;
+  color: var(--ink);
+}
+.context-help summary {
+  cursor: pointer;
+  color: var(--blue-strong);
+  font-weight: 700;
+  padding: 8px 0;
+}
+.context-help p { max-width: 90ch; margin: 8px 0; }
+.field [aria-invalid="true"] { border: 2px solid var(--red); }
+button:disabled { cursor: wait; opacity: 0.7; }
+.sidebar-collapsed .sidebar-profile { display: block; padding-inline: 0; }
+.sidebar-collapsed .sidebar-profile strong,
+.sidebar-collapsed .sidebar-profile small { display: none; }
+.sidebar-collapsed .sidebar-profile .link-button { font-size: 0.8rem; }
+.occurrence-table-wrap,
+.dashboard-table-wrap { overflow-x: auto; }
+.occurrence-table, .dashboard-table, .report-table { min-width: 1050px; }
+.content-grid > *, .report-output > *, .dashboard-grid > * { min-width: 0; }
+.table-wrap { max-width: 100%; }
+.summary-list strong, .metric-card strong { overflow-wrap: anywhere; }
+.folder-button small, .cost-priority small, .priority { font-size: 0.75rem; }
+.notice { color: var(--ink); }
+:focus-visible { outline-color: #955600; }
+.field input, .field select, .field textarea { border-color: #738995; }
+:root[data-theme="dark"] :focus-visible { outline-color: #f2ad48; }
+:root[data-theme="dark"] .field input,
+:root[data-theme="dark"] .field select,
+:root[data-theme="dark"] .field textarea { border-color: #79929f; }
+:root[data-theme="dark"] .primary,
+:root[data-theme="dark"] .ok-button { color: #14252e; }
+:root[data-theme="dark"] .danger,
+:root[data-theme="dark"] .ng-button { background: #20333d; }
+:root[data-theme="dark"] .badge.ok,
+:root[data-theme="dark"] .badge.defined,
+:root[data-theme="dark"] .badge.finished { color: var(--green); }
+:root[data-theme="dark"] .badge.ng { color: var(--red); }
+:root[data-theme="dark"] .badge.pending { color: var(--amber); }
+:root[data-theme="dark"] .badge.started { color: var(--blue); }
+@media (max-width: 1100px) {
+  .sidebar-profile { display: block; margin-top: 15px; }
+}
+@media (max-width: 700px) {
+  .attachment-row, .report-title, .flow-gate { flex-wrap: wrap; }
+  .attachment-row strong { overflow-wrap: anywhere; }
+  .report-filter-grid { grid-template-columns: 1fr; }
+}
+@media print {
+  .occurrence-table, .dashboard-table, .report-table { min-width: 0; }
+  #pageFeedback { display: none; }
+}
+
 @media (max-width: 850px) {
   .filter-grid {
     grid-template-columns: 1fr 1fr;

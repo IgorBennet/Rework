@@ -45,7 +45,8 @@
         <div class="login-card-head">
           <p class="kicker">Acesso interno</p>
           <h2 id="login-title">Acesso ao sistema</h2>
-          <p>Informe suas credenciais corporativas para continuar.</p>
+          <p>Escolha um perfil para explorar o protótipo acadêmico.</p>
+          <p class="notice">Acesso demonstrativo: informe um e-mail válido e uma senha fictícia com pelo menos 4 caracteres. Não é necessário ter uma conta.</p>
         </div>
         <form id="login" class="login-form" novalidate>
           <div class="field">
@@ -70,7 +71,7 @@
                 placeholder="Digite sua senha"
                 required
                 minlength="4"
-              /><button type="button" class="text-button" id="togglePassword">
+              /><button type="button" class="text-button" id="togglePassword" aria-controls="password" aria-pressed="false">
                 Mostrar
               </button>
             </div>
