@@ -346,6 +346,30 @@ const costPriorityCell = (occurrence) => {
 
 // Textos principais usados pela opção de idioma inglês.
 const ENGLISH = {
+  "CONTROLE · RASTREABILIDADE · RESULTADOS": "CONTROL · TRACEABILITY · RESULTS",
+  "Mais controle": "More control",
+  "para um amanhã": "for a more",
+  "mais produtivo.": "productive tomorrow.",
+  "Centralize ocorrências, acompanhe em tempo real,": "Centralize occurrences, monitor in real time,",
+  "reduza perdas e aumente a eficiência da produção.": "reduce losses and improve production efficiency.",
+  "Gestão de ocorrências": "Occurrence management",
+  "Do registro ao fechamento": "From registration to closure",
+  "Rastreabilidade de seriais": "Serial traceability",
+  "Controle preciso e confiável": "Accurate and reliable tracking",
+  "Relatórios inteligentes": "Intelligent reports",
+  "Dados para decisão": "Data for decisions",
+  "Integração entre áreas": "Cross-team collaboration",
+  "Qualidade, Engenharia e Produção": "Quality, Engineering and Production",
+  "Qualidade hoje,": "Quality today,",
+  "produz confiança amanhã.": "builds trust tomorrow.",
+  "Bem-vindo ao Rework": "Welcome to Rework",
+  "Escolha seu perfil para acessar o sistema.": "Choose your profile to access the system.",
+  "Acessar modo demonstração": "Open demonstration mode",
+  "Produção: consulte o Dashboard sem preencher o formulário.": "Production: view the Dashboard without filling out the form.",
+  "Protótipo acadêmico.": "Academic prototype.",
+  "Use e-mail válido e senha fictícia (mínimo 4 caracteres). Sem cadastro real.": "Use a valid email and a fictional password (at least 4 characters). No real account needed.",
+  "Sistema de Gestão de Retrabalho": "Rework Management System",
+  ou: "or",
   "Visão geral": "Overview",
   "Painel da qualidade": "Quality dashboard",
   "Visão consolidada dos bloqueios e do avanço de cada linha.":
@@ -591,7 +615,7 @@ function renderShell() {
     ]);
   sidebar.className = "sidebar";
   sidebar.innerHTML = `
-    <div class="sidebar-head"><div class="brand-mark"><span>R</span><strong>REWORK</strong></div><button id="toggleSidebar" class="sidebar-toggle" type="button" aria-label="Recolher menu" title="Recolher menu">‹</button></div>
+    <div class="sidebar-head"><div class="brand-mark"><img src="assets/rework-symbol.svg" alt="" width="36" height="36"><strong>REWORK</strong></div><button id="toggleSidebar" class="sidebar-toggle" type="button" aria-label="Recolher menu" title="Recolher menu">‹</button></div>
     <div class="nav-group"><small>Operação</small><nav>
       ${operational.map((item) => `<a class="${active === item[0] ? "active" : ""}" href="${item[2]}" title="${item[1]}"><span class="nav-icon">${NAV_ICONS[item[3]]}</span><span class="nav-label">${item[1]}</span></a>`).join("")}
     </nav></div>
