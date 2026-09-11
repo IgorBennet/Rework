@@ -50,7 +50,18 @@ const app = require('../backend/src/app');
   assert.ok(await page.locator('.skip-link').evaluate(el=>el===document.activeElement));
   await page.keyboard.press('Enter');
   assert.ok(await page.locator('main').evaluate(el=>el===document.activeElement));
+  await page.evaluate(() => { window.emagNavigationMarker = true; });
+  await Promise.all([page.waitForEvent('load'),page.locator('#languagePreference').selectOption('en')]);
+  assert.equal(await page.evaluate(() => window.emagNavigationMarker),undefined,'Selecting a language reloads');
+  await open('ocorrencias');
+  for (const id of ['RW-026','RW-025','RW-024']) {
+   assert.equal(await page.getByRole('link',{name:'Ver detalhes ' + id,exact:true}).count(),1);
+  }
+  for (const file of ['ocorrencias','usuarios']) {
+   await open(file);
+   assert.ok(await page.locator('dialog [required]').evaluateAll(fields => fields.every(field => [...field.labels].some(label => label.textContent.includes('*')))),'Required fields have visible marks');
+  }
   assert.deepEqual(errors,[]);
-  console.log(checks + ' axe audits passed; semantics, 320px reflow, text spacing, modal keyboard and skip link passed.');
+  console.log(checks + ' axe audits passed; semantics, 320px reflow, text spacing, modal keyboard, skip link and e-MAG regressions passed.');
  } finally { await browser.close(); await new Promise(r=>server.close(r)); }
 })().catch(e=>{ console.error(e); process.exitCode=1; });

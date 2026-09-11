@@ -570,6 +570,7 @@ function initPreferences() {
       (theme.value === "system" && matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light";
   };
   language.onchange = () => {
+    if (language.value === (localStorage.getItem("rework-language") || "system")) return;
     if (!confirmDiscard()) {
       language.value = localStorage.getItem("rework-language") || "system";
       return;
@@ -717,14 +718,16 @@ function statusBadge(occurrence) {
 
 function occurrenceActions(occurrence, profile) {
   const en = preferenceLanguage() === "en";
+  const context = `<span class="sr-only"> ${esc(occurrence.id)}</span>`;
+  const methodLink = `<a href="metodo-retrabalho.html${params(occurrence.id)}" data-select="${occurrence.id}">${occurrence.method ? "Método / arquivo" : "Definir método"}${context}</a>`;
   if (profile === "Expedição")
-    return `<button class="table-link" type="button" data-edit="${occurrence.id}">${en ? "Edit costs" : "Editar custos"}</button>`;
+    return `<button class="table-link" type="button" data-edit="${occurrence.id}">${en ? "Edit costs" : "Editar custos"}${context}</button>`;
   if (profile === "Engenharia")
-    return `<a href="metodo-retrabalho.html${params(occurrence.id)}" data-select="${occurrence.id}">${occurrence.method ? "Método / arquivo" : "Definir método"}</a>`;
+    return methodLink;
   const actions = occurrence.method
-    ? `<a href="seriais.html${params(occurrence.id)}" data-select="${occurrence.id}">Bipar</a><a href="metodo-retrabalho.html${params(occurrence.id)}" data-select="${occurrence.id}">Arquivo</a>`
-    : `<a href="metodo-retrabalho.html${params(occurrence.id)}" data-select="${occurrence.id}">Definir método</a>`;
-  return (profile === "Qualidade" ? `<a href="detalhes-ocorrencia.html${params(occurrence.id)}">Ver detalhes</a>` : "") + actions + (profile === "Qualidade"
+    ? `<a href="seriais.html${params(occurrence.id)}" data-select="${occurrence.id}">Bipar${context}</a>${methodLink}`
+    : methodLink;
+  return (profile === "Qualidade" ? `<a href="detalhes-ocorrencia.html${params(occurrence.id)}">Ver detalhes${context}</a>` : "") + actions + (profile === "Qualidade"
     ? `<button class="danger compact-action" type="button" data-delete-occurrence="${esc(occurrence.id)}" aria-label="${en ? "Delete occurrence" : "Excluir ocorrência"} ${esc(occurrence.id)}">${en ? "Delete" : "Excluir"}</button>`
     : "");
 }

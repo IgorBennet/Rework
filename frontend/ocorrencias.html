@@ -92,22 +92,22 @@
           </button>
         </header>
         <p id="editPermissionNote" class="notice" hidden></p>
-        <p class="muted">Preencha os dados obrigatórios. Custos são opcionais. Alterações de status, data, faixa ou quantidade serão apresentadas para confirmação.</p>
+        <p class="muted">Campos com * são obrigatórios. Custos são opcionais. Alterações de status, data, faixa ou quantidade serão apresentadas para confirmação.</p>
         <div class="form-grid">
           <div class="field">
-            <label for="editModel">Modelo</label
+            <label for="editModel">Modelo <span aria-hidden="true">*</span></label
             ><input id="editModel" name="model" required />
           </div>
           <div class="field">
-            <label for="editLine">Linha</label
+            <label for="editLine">Linha <span aria-hidden="true">*</span></label
             ><input id="editLine" name="line" required />
           </div>
           <div class="field">
-            <label for="editDate">Data</label
+            <label for="editDate">Data <span aria-hidden="true">*</span></label
             ><input id="editDate" name="date" type="date" required />
           </div>
           <div class="field">
-            <label for="editBlocked">Quantidade bloqueada</label
+            <label for="editBlocked">Quantidade bloqueada <span aria-hidden="true">*</span></label
             ><input
               id="editBlocked"
               name="blocked"
@@ -117,19 +117,19 @@
             />
           </div>
           <div class="field">
-            <label for="editSerialStart">Serial inicial</label>
+            <label for="editSerialStart">Serial inicial <span aria-hidden="true">*</span></label>
             <input id="editSerialStart" name="serialStart" required />
           </div>
           <div class="field">
-            <label for="editSerialEnd">Serial final</label>
+            <label for="editSerialEnd">Serial final <span aria-hidden="true">*</span></label>
             <input id="editSerialEnd" name="serialEnd" required />
           </div>
           <div class="field full">
-            <label for="editDefect">Problema / defeito</label
+            <label for="editDefect">Problema / defeito <span aria-hidden="true">*</span></label
             ><input id="editDefect" name="defect" required />
           </div>
           <div class="field full">
-            <label for="editDescription">Descrição</label
+            <label for="editDescription">Descrição <span aria-hidden="true">*</span></label
             ><textarea
               id="editDescription"
               name="description"
@@ -137,7 +137,7 @@
             ></textarea>
           </div>
           <div class="field">
-            <label for="editPerson">Pessoa responsável</label
+            <label for="editPerson">Pessoa responsável <span aria-hidden="true">*</span></label
             ><input id="editPerson" name="person" required />
           </div>
           <div class="field">

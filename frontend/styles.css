@@ -619,6 +619,7 @@ td.wrap {
   min-width: 170px;
 }
 .table-actions {
+  position: relative;
   display: flex;
   gap: 6px;
 }
