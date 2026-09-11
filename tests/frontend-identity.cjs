@@ -96,8 +96,6 @@ const contrast = (a,b) => {
     await run('Teclado alcança acesso e percorre todos os controles do login',async page => {
       await open(page);
       await page.keyboard.press('Tab');
-      await page.keyboard.press('Tab');
-      await page.keyboard.press('Tab');
       assert.equal(await page.locator('.skip-link').evaluate(el => el === document.activeElement),true);
       await page.keyboard.press('Enter');
       for (const selector of ['#email','#password','#togglePassword','#loginProfile','#login [type=submit]','#publicDashboard']) {
@@ -174,6 +172,7 @@ const contrast = (a,b) => {
           }
         }
       }
+      await open(page,'relatorios');
       await page.emulateMedia({media:'print'});
       assert.equal(await page.locator('body').evaluate(el => getComputedStyle(el).backgroundColor),'rgb(255, 255, 255)');
       assert.equal(await page.locator('#reportOutput').evaluate(el => getComputedStyle(el).color),'rgb(17, 17, 17)');

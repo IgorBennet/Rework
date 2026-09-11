@@ -1419,3 +1419,17 @@ button:disabled { cursor: wait; opacity: 0.7; }
     justify-content: flex-end;
   }
 }
+
+/* Accessible error text and keyboard targets retain the existing palette. */
+.field-error { display: block; color: var(--danger); font-size: .8125rem; line-height: 1.5; margin-top: 4px; }
+.field-error:empty { display: none; }
+button, select, .link-button { min-height: 24px; }
+input::placeholder, textarea::placeholder { color: var(--text-secondary); opacity: 1; }
+@media (forced-colors: active) {
+  :focus-visible { outline: 3px solid Highlight; }
+  .badge, .priority, button, .primary, .secondary { border: 1px solid ButtonText; }
+}
+
+/* Keep long identifiers and enlarged text within narrow layouts. */
+.app-main, .login-card, .login-story { overflow-wrap: anywhere; }
+.field { min-width: 0; }
