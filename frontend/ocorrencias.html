@@ -4,12 +4,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Rework | Ocorrências</title>
+    <link rel="icon" href="assets/rework-symbol.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body class="app-body">
     <a class="skip-link" href="#main">Ir para o conteúdo</a>
     <aside id="sidebar" data-active="occurrences"></aside>
-    <main id="main" class="app-main">
+    <main id="main" class="app-main" tabindex="-1">
       <header class="page-top">
         <div>
           <p class="kicker">Histórico de bloqueios</p>
@@ -57,15 +58,15 @@
           <table class="occurrence-table">
             <thead>
               <tr>
-                <th><span class="sr-only">Editar</span></th>
-                <th>Produto / linha</th>
-                <th>Data</th>
-                <th>Problema</th>
-                <th>Responsável</th>
-                <th>Quantidades</th>
-                <th>Status</th>
-                <th>Custo / prioridade</th>
-                <th>Ação</th>
+                <th scope="col"><span class="sr-only">Editar</span></th>
+                <th scope="col">Produto / linha</th>
+                <th scope="col">Data</th>
+                <th scope="col">Problema</th>
+                <th scope="col">Responsável</th>
+                <th scope="col">Quantidades</th>
+                <th scope="col">Status</th>
+                <th scope="col">Custo / prioridade</th>
+                <th scope="col">Ação</th>
               </tr>
             </thead>
             <tbody id="occurrenceRows"></tbody>

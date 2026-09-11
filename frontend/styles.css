@@ -1,42 +1,77 @@
 /* 1. Tema e configurações gerais */
 :root {
-  --blue: #235b83;
-  --blue-strong: #16425f;
-  --blue-soft: #eaf3f8;
-  --green: #26765b;
-  --green-soft: #e8f5ef;
-  --ink: #20313d;
-  --muted: #607480;
-  --line: #d5e0e5;
-  --soft: #f3f7f8;
-  --red: #a33d45;
-  --red-soft: #fff0f1;
-  --amber: #8a641c;
-  --amber-soft: #fff7df;
-  --shadow: 0 8px 24px rgba(32, 49, 61, 0.07);
+  color-scheme: light;
+  --primary: #1852ec;
+  --primary-hover: #1242c7;
+  --on-primary: #ffffff;
+  --navy: #102d53;
+  --background: #f5f8fd;
+  --surface: #ffffff;
+  --surface-secondary: #edf4fc;
+  --surface-hover: #e5effd;
+  --border: #c7d7ea;
+  --input-border: #7589a4;
+  --text: #183457;
+  --text-secondary: #516985;
+  --success: #176b4e;
+  --success-soft: #e7f5ee;
+  --on-success: #ffffff;
+  --warning: #805400;
+  --warning-soft: #fff4d8;
+  --danger: #a32c40;
+  --danger-soft: #fff0f2;
+  --focus: #1748bb;
+  --accent: #6c4595;
+  --shadow: 0 16px 44px rgb(20 60 120 / 10%);
+  --shadow-subtle: 0 2px 8px rgb(20 60 120 / 4%);
+  --backdrop: rgb(10 30 60 / 55%);
+  /* Compatibilidade com os componentes existentes. */
+  --blue: var(--primary);
+  --blue-strong: var(--navy);
+  --blue-soft: var(--surface-secondary);
+  --green: var(--success);
+  --green-soft: var(--success-soft);
+  --ink: var(--text);
+  --muted: var(--text-secondary);
+  --line: var(--border);
+  --soft: var(--surface-secondary);
+  --red: var(--danger);
+  --red-soft: var(--danger-soft);
+  --amber: var(--warning);
+  --amber-soft: var(--warning-soft);
 }
 
 /* O tema escuro troca somente as variáveis e superfícies principais. */
 :root[data-theme="dark"] {
-  --blue: #65a9da;
-  --blue-strong: #9bd0f4;
-  --blue-soft: #19384b;
-  --green: #65c49d;
-  --green-soft: #183c31;
-  --ink: #e5eef3;
-  --muted: #a6bac5;
-  --line: #38505c;
-  --soft: #20333d;
-  --red: #f08a92;
-  --red-soft: #48282d;
-  --amber: #e8bd67;
-  --amber-soft: #493b20;
-  --shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  color-scheme: dark;
+  --primary: #8ebaff;
+  --primary-hover: #b3d0ff;
+  --on-primary: #102544;
+  --navy: #e0ecff;
+  --background: #0c192b;
+  --surface: #13243b;
+  --surface-secondary: #1b304d;
+  --surface-hover: #263f60;
+  --border: #385273;
+  --input-border: #819ab8;
+  --text: #e2ecfa;
+  --text-secondary: #b0c2dc;
+  --success: #88d4b0;
+  --success-soft: #163d32;
+  --on-success: #102b20;
+  --warning: #f3cd79;
+  --warning-soft: #44381f;
+  --danger: #ff9aaa;
+  --danger-soft: #492935;
+  --focus: #aecfff;
+  --accent: #ccaaec;
+  --shadow: 0 16px 44px rgb(0 0 0 / 25%);
+  --shadow-subtle: 0 2px 8px rgb(0 0 0 / 15%);
 }
 
 :root[data-theme="dark"] body,
 :root[data-theme="dark"] .app-body {
-  background: #14252e;
+  background: var(--background);
 }
 :root[data-theme="dark"] .sidebar,
 :root[data-theme="dark"] .panel,
@@ -44,21 +79,21 @@
 :root[data-theme="dark"] table,
 :root[data-theme="dark"] .login-card,
 :root[data-theme="dark"] .edit-dialog {
-  background: #1b2d36;
+  background: var(--surface);
   color: var(--ink);
 }
 :root[data-theme="dark"] th {
-  background: #263d48;
-  color: #c8d9e1;
+  background: var(--surface-secondary);
+  color: var(--text);
 }
 :root[data-theme="dark"] tbody tr:hover {
-  background: #223944;
+  background: var(--surface-hover);
 }
 :root[data-theme="dark"] .field input,
 :root[data-theme="dark"] .field select,
 :root[data-theme="dark"] .field textarea,
 :root[data-theme="dark"] .secondary {
-  background: #20333d;
+  background: var(--surface-secondary);
   color: var(--ink);
   border-color: var(--line);
 }
@@ -75,7 +110,7 @@ body {
     Arial,
     sans-serif;
   color: var(--ink);
-  background: #f6f9fa;
+  background: var(--background);
 }
 button,
 input,
@@ -107,7 +142,7 @@ h2 {
   top: -80px;
   left: 16px;
   z-index: 100;
-  background: #fff;
+  background: var(--surface);
   padding: 10px 14px;
   border: 2px solid var(--blue);
   border-radius: 8px;
@@ -116,12 +151,12 @@ h2 {
   top: 16px;
 }
 :focus-visible {
-  outline: 3px solid #f2ad48;
+  outline: 3px solid var(--focus);
   outline-offset: 2px;
 }
 .kicker {
   margin: 0 0 5px;
-  color: var(--green);
+  color: var(--primary);
   font-size: 0.72rem;
   font-weight: 800;
   text-transform: uppercase;
@@ -148,20 +183,25 @@ h2 {
 }
 .primary {
   background: var(--blue);
-  color: #fff;
+  color: var(--on-primary);
 }
 .primary:hover {
-  background: var(--blue-strong);
+  background: var(--primary-hover);
 }
+.secondary:hover, .text-button:hover, .link-button:hover {
+  background: var(--surface-hover);
+}
+.danger:hover, .ng-button:hover { background: var(--danger-soft); }
+.ok-button { color: var(--on-success); }
 .secondary {
-  background: #fff;
+  background: var(--surface);
   color: var(--blue-strong);
   border-color: var(--line);
 }
 .danger {
-  background: #fff;
+  background: var(--surface);
   color: var(--red);
-  border-color: #e8bfc3;
+  border-color: var(--danger);
 }
 .text-button,
 .link-button {
@@ -193,9 +233,9 @@ h2 {
 .field textarea {
   width: 100%;
   padding: 10px 11px;
-  border: 1px solid #b9c7ce;
+  border: 1px solid var(--input-border);
   border-radius: 7px;
-  background: #fff;
+  background: var(--surface);
   color: var(--ink);
 }
 .field textarea {
@@ -234,117 +274,29 @@ h2 {
   border-left: 4px solid var(--blue);
   border-radius: 5px;
   background: var(--blue-soft);
-  color: #315466;
+  color: var(--text);
 }
-/* 3. Tela inicial e login */
-.login-page {
-  min-height: 100vh;
-  background: #eef5f6;
-}
-.login-shell {
-  min-height: 100vh;
-  display: grid;
-  grid-template-columns: minmax(280px, 0.8fr) minmax(420px, 1.2fr);
-}
-.login-story {
-  padding: clamp(30px, 5vw, 72px);
-  background: linear-gradient(145deg, #184c6c, #276f72);
-  color: #fff;
-  display: flex;
-  flex-direction: column;
-}
+/* 3. Marca compartilhada; layout do acesso em login.css. */
 .brand-mark {
   display: flex;
   align-items: center;
   gap: 10px;
   font-weight: 800;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
 }
-.brand-mark span {
-  width: 36px;
-  height: 36px;
-  display: grid;
-  place-items: center;
-  border-radius: 9px;
-  background: #fff;
-  color: var(--blue-strong);
-}
-.story-copy {
-  margin: auto 0;
-  max-width: 510px;
-}
-.story-copy .kicker {
-  color: #bfe8d6;
-}
-.story-copy h1 {
-  font-size: clamp(2rem, 4.2vw, 4rem);
-  font-weight: 650;
-}
-.story-copy p {
-  color: #dbeaf0;
-}
-.prototype-note {
-  margin: 18px 0 0;
-  font-size: 0.75rem;
-  color: #bcd2da;
-}
-.login-card {
-  align-self: center;
-  width: min(480px, calc(100% - 40px));
-  margin: 30px auto;
-  padding: clamp(26px, 5vw, 46px);
-  background: #fff;
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  box-shadow: var(--shadow);
-}
-.login-form {
-  display: grid;
-  gap: 15px;
-  margin-top: 24px;
-}
-.password-row {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 8px;
-}
-.production-guide {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  gap: 12px;
-  margin-top: 26px;
-  padding: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.09);
-}
-
-.production-guide p {
-  margin: 2px 0 0;
-  color: #dbeaf0;
-  font-size: 0.82rem;
-}
-
-.public-dashboard-button {
-  padding: 9px 13px;
-  border-radius: 7px;
-  background: #fff;
-  color: var(--blue-strong);
-  font-weight: 800;
-  text-decoration: none;
-}
+.brand-mark img { width: 36px; height: 36px; flex: 0 0 36px; }
+.password-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
 
 /* 4. Estrutura interna: menu lateral e conteúdo */
 .app-body {
-  background: #f6f9fa;
+  background: var(--background);
 }
 .sidebar {
   position: fixed;
   inset: 0 auto 0 0;
   width: 236px;
   padding: 22px 14px;
-  background: #fff;
+  background: var(--surface);
   border-right: 1px solid var(--line);
   overflow: auto;
   display: flex;
@@ -357,7 +309,7 @@ h2 {
 }
 .sidebar .brand-mark span {
   background: var(--blue);
-  color: #fff;
+  color: var(--on-primary);
 }
 .nav-group {
   margin-top: 18px;
@@ -488,12 +440,12 @@ h2 {
   padding: 7px;
   border: 1px solid var(--line);
   border-radius: 9px;
-  background: color-mix(in srgb, #fff 92%, transparent);
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
   box-shadow: var(--shadow);
 }
 
 :root[data-theme="dark"] .ui-preferences {
-  background: rgba(27, 45, 54, 0.94);
+  background: var(--surface);
 }
 
 .ui-preferences label {
@@ -531,11 +483,11 @@ h2 {
 }
 /* 5. Painéis, grades e resumos */
 .panel {
-  background: #fff;
+  background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 10px;
   padding: 20px;
-  box-shadow: 0 2px 8px rgba(32, 49, 61, 0.03);
+  box-shadow: var(--shadow-subtle);
 }
 .panel h2 {
   margin-bottom: 15px;
@@ -563,7 +515,7 @@ h2 {
   gap: 14px;
 }
 .metric-card {
-  background: #fff;
+  background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 10px;
   padding: 17px;
@@ -640,7 +592,7 @@ h2 {
 table {
   width: 100%;
   border-collapse: collapse;
-  background: #fff;
+  background: var(--surface);
   font-size: 0.78rem;
 }
 th,
@@ -654,13 +606,13 @@ td {
 th {
   position: sticky;
   top: 0;
-  background: #edf3f5;
-  color: #3f5664;
+  background: var(--surface-secondary);
+  color: var(--navy);
   font-size: 0.72rem;
   text-transform: uppercase;
 }
 tbody tr:hover {
-  background: #f8fbfc;
+  background: var(--surface-hover);
 }
 td.wrap {
   white-space: normal;
@@ -691,19 +643,19 @@ td.wrap {
 .badge.ok,
 .badge.defined,
 .badge.finished {
-  color: #1b684d;
+  color: var(--success);
   background: var(--green-soft);
 }
 .badge.ng {
-  color: #91333b;
+  color: var(--danger);
   background: var(--red-soft);
 }
 .badge.pending {
-  color: #7c5a18;
+  color: var(--warning);
   background: var(--amber-soft);
 }
 .badge.started {
-  color: #245b7c;
+  color: var(--primary);
   background: var(--blue-soft);
 }
 /* 7. Cadastro de ocorrência e containers */
@@ -735,7 +687,7 @@ td.wrap {
 .step.active b,
 .step.done b {
   background: var(--blue);
-  color: #fff;
+  color: var(--on-primary);
 }
 .step-line {
   width: 42px;
@@ -781,15 +733,15 @@ td.wrap {
 }
 .ok-button {
   background: var(--green);
-  color: #fff;
+  color: var(--on-success);
   border: 0;
   border-radius: 8px;
   font-weight: 800;
 }
 .ng-button {
-  background: #fff;
+  background: var(--surface);
   color: var(--red);
-  border: 1px solid #dbaeb2;
+  border: 1px solid var(--danger);
   border-radius: 8px;
   font-weight: 800;
 }
@@ -804,7 +756,7 @@ td.wrap {
   gap: 14px;
   padding: 13px;
   background: var(--amber-soft);
-  border: 1px solid #ead9a7;
+  border: 1px solid var(--warning);
   border-radius: 8px;
   margin-bottom: 15px;
 }
@@ -848,15 +800,6 @@ td.wrap {
   }
 }
 @media (max-width: 700px) {
-  .login-shell {
-    grid-template-columns: 1fr;
-  }
-  .login-story {
-    min-height: 330px;
-  }
-  .story-copy {
-    margin: 50px 0 25px;
-  }
   .sidebar nav {
     grid-template-columns: 1fr 1fr;
   }
@@ -1077,25 +1020,25 @@ td.wrap {
   font-weight: 800;
 }
 .priority.low {
-  color: #287457;
+  color: var(--success);
   background: var(--green-soft);
 }
 .priority.medium {
-  color: #8a641c;
+  color: var(--warning);
   background: var(--amber-soft);
 }
 .priority.high {
-  color: #a33d45;
+  color: var(--danger);
   background: var(--red-soft);
 }
 :root[data-theme="dark"] .priority.low {
-  color: #8cdbbb;
+  color: var(--success);
 }
 :root[data-theme="dark"] .priority.medium {
-  color: #f1ca7d;
+  color: var(--warning);
 }
 :root[data-theme="dark"] .priority.high {
-  color: #ff9da4;
+  color: var(--danger);
 }
 
 .filter-clear {
@@ -1153,7 +1096,7 @@ td.wrap {
 }
 
 .edit-dialog::backdrop {
-  background: rgba(22, 45, 59, 0.52);
+  background: var(--backdrop);
 }
 
 .dialog-header,
@@ -1269,10 +1212,10 @@ progress::-moz-progress-bar {
   background: var(--blue);
 }
 .profile-dot.production {
-  background: #d7952d;
+  background: var(--warning);
 }
 .profile-dot.shipping {
-  background: #8758a6;
+  background: var(--accent);
 }
 
 /* 13. Geração e impressão de relatórios */
@@ -1299,11 +1242,11 @@ progress::-moz-progress-bar {
   padding: 18px 20px;
   border: 1px solid var(--line);
   border-radius: 10px;
-  background: #fff;
+  background: var(--surface);
 }
 
 :root[data-theme="dark"] .report-title {
-  background: #1b2d36;
+  background: var(--surface);
 }
 
 .report-title h2,
@@ -1364,6 +1307,7 @@ progress::-moz-progress-bar {
   .table-wrap {
     overflow: visible;
   }
+  .report-output * { color: inherit !important; background: transparent !important; }
 }
 .detail-description {
   margin-top: 15px;
@@ -1371,6 +1315,7 @@ progress::-moz-progress-bar {
 .action-offset {
   margin-top: 14px;
 }
+.sidebar .brand-mark strong { color: var(--navy); }
 
 /* Feedback e orientação: visibilidade, leitura e operação em telas pequenas. */
 .feedback-box:not(:empty) {
@@ -1404,16 +1349,16 @@ button:disabled { cursor: wait; opacity: 0.7; }
 .summary-list strong, .metric-card strong { overflow-wrap: anywhere; }
 .folder-button small, .cost-priority small, .priority { font-size: 0.75rem; }
 .notice { color: var(--ink); }
-:focus-visible { outline-color: #955600; }
-.field input, .field select, .field textarea { border-color: #738995; }
-:root[data-theme="dark"] :focus-visible { outline-color: #f2ad48; }
+:focus-visible { outline-color: var(--focus); }
+.field input, .field select, .field textarea { border-color: var(--input-border); }
+:root[data-theme="dark"] :focus-visible { outline-color: var(--focus); }
 :root[data-theme="dark"] .field input,
 :root[data-theme="dark"] .field select,
-:root[data-theme="dark"] .field textarea { border-color: #79929f; }
+:root[data-theme="dark"] .field textarea { border-color: var(--input-border); }
 :root[data-theme="dark"] .primary,
-:root[data-theme="dark"] .ok-button { color: #14252e; }
+:root[data-theme="dark"] .ok-button { color: var(--on-primary); }
 :root[data-theme="dark"] .danger,
-:root[data-theme="dark"] .ng-button { background: #20333d; }
+:root[data-theme="dark"] .ng-button { background: var(--surface-secondary); }
 :root[data-theme="dark"] .badge.ok,
 :root[data-theme="dark"] .badge.defined,
 :root[data-theme="dark"] .badge.finished { color: var(--green); }
@@ -1462,13 +1407,6 @@ button:disabled { cursor: wait; opacity: 0.7; }
     align-items: flex-start;
     flex-direction: column;
   }
-  .production-guide {
-    grid-template-columns: auto 1fr;
-  }
-  .public-dashboard-button {
-    grid-column: 1 / -1;
-    text-align: center;
-  }
   .cost-fields {
     grid-template-columns: 1fr;
   }
@@ -1481,3 +1419,17 @@ button:disabled { cursor: wait; opacity: 0.7; }
     justify-content: flex-end;
   }
 }
+
+/* Accessible error text and keyboard targets retain the existing palette. */
+.field-error { display: block; color: var(--danger); font-size: .8125rem; line-height: 1.5; margin-top: 4px; }
+.field-error:empty { display: none; }
+button, select, .link-button { min-height: 24px; }
+input::placeholder, textarea::placeholder { color: var(--text-secondary); opacity: 1; }
+@media (forced-colors: active) {
+  :focus-visible { outline: 3px solid Highlight; }
+  .badge, .priority, button, .primary, .secondary { border: 1px solid ButtonText; }
+}
+
+/* Keep long identifiers and enlarged text within narrow layouts. */
+.app-main, .login-card, .login-story { overflow-wrap: anywhere; }
+.field { min-width: 0; }

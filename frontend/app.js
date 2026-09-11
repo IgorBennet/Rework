@@ -27,9 +27,20 @@ function feedback(message, error = false, target) {
 function fieldError(field, message, host) {
   feedback(message, true, host);
   field.setAttribute("aria-invalid", "true");
-  if (host?.id) {
+  if (field.id) {
+    const errorId = `${field.id}-error`;
+    let error = document.getElementById(errorId);
+    if (!error) {
+      error = document.createElement("small");
+      error.id = errorId;
+      error.className = "field-error";
+      const group = field.closest(".field");
+      if (group) group.append(error);
+      else field.after(error);
+    }
+    error.textContent = message;
     const descriptions = new Set((field.getAttribute("aria-describedby") || "").split(" ").filter(Boolean));
-    descriptions.add(host.id);
+    descriptions.add(errorId);
     field.setAttribute("aria-describedby", [...descriptions].join(" "));
   }
   field.focus();
@@ -59,7 +70,11 @@ function initFormGuidance() {
     form.dataset.protect = "true";
     markClean(form);
   });
-  document.addEventListener("input", (event) => event.target.removeAttribute("aria-invalid"));
+  document.addEventListener("input", (event) => {
+    event.target.removeAttribute("aria-invalid");
+    const error = document.getElementById(`${event.target.id}-error`);
+    if (error) error.textContent = "";
+  });
   document.querySelectorAll(".field").forEach((group, index) => {
     const field = group.querySelector("input, select, textarea");
     const hint = group.querySelector("small");
@@ -82,9 +97,16 @@ function initFormGuidance() {
     event.returnValue = "";
   });
   document.querySelectorAll(".table-wrap").forEach((wrap) => {
+    const table = wrap.querySelector("table");
+    if (table) {
+      const caption = table.caption || table.createCaption();
+      caption.className = "sr-only";
+      caption.textContent ||= wrap.closest("section, article")?.querySelector("h2")?.textContent || document.querySelector("h1")?.textContent || "Dados";
+      table.querySelectorAll("thead th").forEach(th => th.scope = "col");
+      wrap.setAttribute("aria-label", caption.textContent);
+    }
     wrap.tabIndex = 0;
     wrap.setAttribute("role", "region");
-    wrap.setAttribute("aria-label", uiText("Tabela: use as setas para rolar quando necessário", "Table: use arrow keys to scroll when needed"));
     const hint = document.createElement("p");
     hint.className = "muted table-scroll-hint no-print";
     hint.textContent = uiText("Há mais colunas à direita. Deslize a tabela ou use as setas com a tabela em foco.", "More columns are available to the right. Swipe the table or focus it and use arrow keys.");
@@ -346,6 +368,30 @@ const costPriorityCell = (occurrence) => {
 
 // Textos principais usados pela opção de idioma inglês.
 const ENGLISH = {
+  "CONTROLE · RASTREABILIDADE · RESULTADOS": "CONTROL · TRACEABILITY · RESULTS",
+  "Mais controle": "More control",
+  "para um amanhã": "for a more",
+  "mais produtivo.": "productive tomorrow.",
+  "Centralize ocorrências, acompanhe em tempo real,": "Centralize occurrences, monitor in real time,",
+  "reduza perdas e aumente a eficiência da produção.": "reduce losses and improve production efficiency.",
+  "Gestão de ocorrências": "Occurrence management",
+  "Do registro ao fechamento": "From registration to closure",
+  "Rastreabilidade de seriais": "Serial traceability",
+  "Controle preciso e confiável": "Accurate and reliable tracking",
+  "Relatórios inteligentes": "Intelligent reports",
+  "Dados para decisão": "Data for decisions",
+  "Integração entre áreas": "Cross-team collaboration",
+  "Qualidade, Engenharia e Produção": "Quality, Engineering and Production",
+  "Qualidade hoje,": "Quality today,",
+  "produz confiança amanhã.": "builds trust tomorrow.",
+  "Bem-vindo ao Rework": "Welcome to Rework",
+  "Escolha seu perfil para acessar o sistema.": "Choose your profile to access the system.",
+  "Acessar modo demonstração": "Open demonstration mode",
+  "Produção: consulte o Dashboard sem preencher o formulário.": "Production: view the Dashboard without filling out the form.",
+  "Protótipo acadêmico.": "Academic prototype.",
+  "Use e-mail válido e senha fictícia (mínimo 4 caracteres). Sem cadastro real.": "Use a valid email and a fictional password (at least 4 characters). No real account needed.",
+  "Sistema de Gestão de Retrabalho": "Rework Management System",
+  ou: "or",
   "Visão geral": "Overview",
   "Painel da qualidade": "Quality dashboard",
   "Visão consolidada dos bloqueios e do avanço de cada linha.":
@@ -508,6 +554,14 @@ function initPreferences() {
   );
   const theme = document.querySelector("#themePreference");
   const language = document.querySelector("#languagePreference");
+  const skip = document.querySelector(".skip-link");
+  if (skip) document.body.prepend(skip);
+  const languageHint = document.createElement("small");
+  languageHint.id = "language-change-hint";
+  languageHint.className = "sr-only";
+  languageHint.textContent = uiText("A escolha do idioma recarrega a página.", "Choosing a language reloads the page.");
+  language.after(languageHint);
+  language.setAttribute("aria-describedby", languageHint.id);
   theme.value = themeSetting;
   language.value = localStorage.getItem("rework-language") || "system";
   theme.onchange = () => {
@@ -591,7 +645,7 @@ function renderShell() {
     ]);
   sidebar.className = "sidebar";
   sidebar.innerHTML = `
-    <div class="sidebar-head"><div class="brand-mark"><span>R</span><strong>REWORK</strong></div><button id="toggleSidebar" class="sidebar-toggle" type="button" aria-label="Recolher menu" title="Recolher menu">‹</button></div>
+    <div class="sidebar-head"><div class="brand-mark"><img src="assets/rework-symbol.svg" alt="" width="36" height="36"><strong>REWORK</strong></div><button id="toggleSidebar" class="sidebar-toggle" type="button" aria-label="Recolher menu" title="Recolher menu">‹</button></div>
     <div class="nav-group"><small>Operação</small><nav>
       ${operational.map((item) => `<a class="${active === item[0] ? "active" : ""}" href="${item[2]}" title="${item[1]}"><span class="nav-icon">${NAV_ICONS[item[3]]}</span><span class="nav-label">${item[1]}</span></a>`).join("")}
     </nav></div>
