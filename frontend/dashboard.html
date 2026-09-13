@@ -27,6 +27,22 @@
         class="dashboard-grid"
         aria-label="Indicadores gerais"
       ></section>
+      <section class="panel dashboard-charts" aria-label="Gráficos de acompanhamento operacional">
+        <div class="section-heading">
+          <p class="kicker">Acompanhamento operacional</p>
+          <span id="dashboardChartsUpdated" class="page-stamp"></span>
+        </div>
+        <div class="dashboard-charts-grid">
+          <article class="dashboard-chart" aria-labelledby="statusChartTitle">
+            <h2 id="statusChartTitle">Ocorrências por status</h2>
+            <div id="dashboardStatusChart"></div>
+          </article>
+          <article class="dashboard-chart" aria-labelledby="costChartTitle">
+            <h2 id="costChartTitle">Ocorrências por linha</h2>
+            <div id="dashboardCostChart"></div>
+          </article>
+        </div>
+      </section>
       <!-- Acompanhamento detalhado de cada bloqueio. -->
       <section class="panel dashboard-detail">
         <div class="section-heading">
