@@ -972,12 +972,13 @@ function renderDashboardCharts(data, open) {
     lines.set(line, (lines.get(line) || 0) + 1);
   });
   const total = open.length;
+  const maxCount = Math.max(1, ...lines.values());
   document.querySelector("#dashboardCostChart").innerHTML = `<div class="dashboard-cost-list">${[...lines]
     .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
     .map(([line, count]) => {
       const share = total > 0 ? count / total * 100 : 0;
       return `<div class="dashboard-cost-row"><strong>${esc(line)}</strong>
-        <div class="dashboard-cost-track" aria-hidden="true"><span style="width:${share}%"></span></div>
+        <div class="dashboard-cost-track" aria-hidden="true"><span style="height:${count / maxCount * 100}%"></span></div>
         <div class="dashboard-cost-value"><strong>${num(count)} ${count === 1 ? uiText("ocorrência", "occurrence") : uiText("ocorrências", "occurrences")}</strong><span>(${share.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%)</span></div></div>`;
     }).join("") || `<p class="muted">${uiText("Nenhuma ocorrência aberta por linha.", "No open occurrences by line.")}</p>`}</div>`;
   document.querySelector("#statusChartTitle").textContent = uiText("Ocorrências por status", "Occurrences by status");
