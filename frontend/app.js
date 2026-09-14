@@ -942,6 +942,50 @@ function initOccurrences() {
 }
 
 // Calcula indicadores e o progresso exibidos no Dashboard.
+function renderDashboardCharts(data, open) {
+  const statusHost = document.querySelector("#dashboardStatusChart");
+  if (!statusHost) return;
+  const statuses = [
+    { value: "Pendente", label: uiText("Pendente", "Pending"), color: "#facc15" },
+    { value: "Iniciado", label: uiText("Iniciado", "Started"), color: "var(--primary)" },
+    { value: "Finalizado", label: uiText("Concluído", "Completed"), color: "var(--success)" },
+  ].map(status => ({ ...status, count: data.filter(item => item.status === status.value).length }));
+  const statusTotal = statuses.reduce((sum, status) => sum + status.count, 0);
+  let offset = 0;
+  const segments = statuses.map(status => {
+    const start = offset;
+    offset += statusTotal ? status.count / statusTotal * 100 : 0;
+    return `${status.color} ${start}% ${offset}%`;
+  });
+  const donutBackground = statusTotal ? `conic-gradient(${segments.join(", ")})` : "var(--surface-secondary)";
+  statusHost.innerHTML = `<div class="dashboard-status-layout">
+    <div class="dashboard-status-donut" style="background:${donutBackground}" aria-hidden="true">
+      <div class="dashboard-status-total"><strong>${num(statusTotal)}</strong><span>${uiText("Total", "Total")}</span></div>
+    </div>
+    <ul class="dashboard-status-legend">${statuses.map(status => `<li><span class="dashboard-chart-dot" style="background:${status.color}" aria-hidden="true"></span><span>${status.label}</span><strong>${num(status.count)}</strong></li>`).join("")}</ul>
+  </div>${!data.length ? `<p class="muted">${uiText("Nenhuma ocorrência registrada.", "No occurrences recorded.")}</p>` : ""}`;
+
+  // Mesmo recorte dos indicadores: quantidade de ocorrências abertas por linha.
+  const lines = new Map();
+  open.forEach(item => {
+    const line = item.line?.trim() || uiText("Sem linha", "No line");
+    lines.set(line, (lines.get(line) || 0) + 1);
+  });
+  const total = open.length;
+  const maxCount = Math.max(1, ...lines.values());
+  document.querySelector("#dashboardCostChart").innerHTML = `<div class="dashboard-cost-list">${[...lines]
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .map(([line, count]) => {
+      const share = total > 0 ? count / total * 100 : 0;
+      return `<div class="dashboard-cost-row"><strong>${esc(line)}</strong>
+        <div class="dashboard-cost-track" aria-hidden="true"><span style="height:${count / maxCount * 100}%"></span></div>
+        <div class="dashboard-cost-value"><strong>${num(count)} ${count === 1 ? uiText("ocorrência", "occurrence") : uiText("ocorrências", "occurrences")}</strong><span>(${share.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%)</span></div></div>`;
+    }).join("") || `<p class="muted">${uiText("Nenhuma ocorrência aberta por linha.", "No open occurrences by line.")}</p>`}</div>`;
+  document.querySelector("#statusChartTitle").textContent = uiText("Ocorrências por status", "Occurrences by status");
+  document.querySelector("#costChartTitle").textContent = uiText("Ocorrências por linha", "Occurrences by line");
+  document.querySelector("#dashboardChartsUpdated").textContent = `${uiText("Atualizado em", "Updated on")} ${new Date().toLocaleDateString("pt-BR")}`;
+}
+
 function initDashboard() {
   const metrics = document.querySelector("#dashboardMetrics");
   if (!metrics) return;
@@ -950,6 +994,7 @@ function initDashboard() {
     ["Iniciado", "Pendente"].includes(item.status),
   );
   const blocked = open.reduce((total, item) => total + item.blocked, 0);
+  renderDashboardCharts(data, open);
   const checked = open.reduce((total, item) => total + inspected(item), 0);
   const ng = open.reduce((total, item) => total + defects(item), 0);
   const totalCost = open.reduce(
